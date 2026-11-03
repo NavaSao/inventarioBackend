@@ -1,0 +1,169 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EstadoActivo {
+  DISPONIBLE
+  ASIGNADO
+  EN_MANTENIMIENTO
+  DADO_DE_BAJA
+}
+
+model Usuario {
+  idUsuario     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre        String
+  correo        String   @unique
+  passwordHash  String
+  activo        Boolean  @default(true)
+  versionSesion Int      @default(0)
+  creadoEn      DateTime @default(now()) @db.Timestamptz(3)
+  actualizadoEn DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  entregas     AsignacionActivo[]   @relation("UsuarioEntrega")
+  devoluciones AsignacionActivo[]   @relation("UsuarioDevolucion")
+  asignaciones AsignacionLicencia[] @relation("UsuarioAsignacion")
+  liberaciones AsignacionLicencia[] @relation("UsuarioLiberacion")
+  inicios      Mantenimiento[]      @relation("UsuarioInicio")
+  cierres      Mantenimiento[]      @relation("UsuarioCierre")
+
+  @@map("Usuarios")
+}
+
+model Empleado {
+  idEmpleado     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  numeroEmpleado String   @unique
+  nombre         String
+  correo         String   @unique
+  departamento   String?
+  activo         Boolean  @default(true)
+  creadoEn       DateTime @default(now()) @db.Timestamptz(3)
+  actualizadoEn  DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  asignacionesActivos   AsignacionActivo[]
+  asignacionesLicencias AsignacionLicencia[]
+
+  @@map("Empleados")
+}
+
+model Activo {
+  idActivo       String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre         String
+  numeroSerie    String       @unique
+  etiqueta       String       @unique
+  categoria      String
+  ubicacion      String
+  marca          String?
+  modelo         String?
+  estado         EstadoActivo @default(DISPONIBLE)
+  fotoReferencia String?
+  fechaBaja      DateTime?    @db.Timestamptz(3)
+  motivoBaja     String?
+  creadoEn       DateTime     @default(now()) @db.Timestamptz(3)
+  actualizadoEn  DateTime     @default(now()) @updatedAt @db.Timestamptz(3)
+
+  asignaciones   AsignacionActivo[]
+  mantenimientos Mantenimiento[]
+
+  @@index([estado])
+  @@map("Activos")
+}
+
+model AsignacionActivo {
+  idAsignacionActivo  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  idActivo            String    @db.Uuid
+  idEmpleado          String    @db.Uuid
+  idUsuarioEntrega    String    @db.Uuid
+  entregadoEn         DateTime  @default(now()) @db.Timestamptz(3)
+  notaEntrega         String?
+  idUsuarioDevolucion String?   @db.Uuid
+  devueltoEn          DateTime? @db.Timestamptz(3)
+  notaDevolucion      String?
+  claveEntrega        String    @unique @db.Uuid
+  claveDevolucion     String?   @unique @db.Uuid
+  creadoEn            DateTime  @default(now()) @db.Timestamptz(3)
+  actualizadoEn       DateTime  @default(now()) @updatedAt @db.Timestamptz(3)
+
+  activo       Activo   @relation(fields: [idActivo], references: [idActivo], onDelete: Restrict, onUpdate: Restrict)
+  empleado     Empleado @relation(fields: [idEmpleado], references: [idEmpleado], onDelete: Restrict, onUpdate: Restrict)
+  entregadoPor Usuario  @relation("UsuarioEntrega", fields: [idUsuarioEntrega], references: [idUsuario], onDelete: Restrict, onUpdate: Restrict)
+  devueltoPor  Usuario? @relation("UsuarioDevolucion", fields: [idUsuarioDevolucion], references: [idUsuario], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([idActivo, entregadoEn])
+  @@index([idEmpleado, devueltoEn])
+  // El índice único de asignaciones abiertas se conserva en la migración SQL.
+  @@map("AsignacionesActivos")
+}
+
+model Licencia {
+  idLicencia         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  software           String
+  proveedor          String?
+  referenciaContrato String?
+  inicioVigencia     DateTime @db.Date
+  finVigencia        DateTime @db.Date
+  cuposContratados   Int
+  costo              Decimal  @db.Decimal(12, 2)
+  moneda             String
+  creadoEn           DateTime @default(now()) @db.Timestamptz(3)
+  actualizadoEn      DateTime @default(now()) @updatedAt @db.Timestamptz(3)
+
+  asignaciones AsignacionLicencia[]
+
+  @@index([finVigencia])
+  @@map("Licencias")
+}
+
+model AsignacionLicencia {
+  idAsignacionLicencia String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  idLicencia           String    @db.Uuid
+  idEmpleado           String    @db.Uuid
+  idUsuarioAsignacion  String    @db.Uuid
+  asignadoEn           DateTime  @default(now()) @db.Timestamptz(3)
+  idUsuarioLiberacion  String?   @db.Uuid
+  liberadoEn           DateTime? @db.Timestamptz(3)
+  nota                 String?
+  claveAsignacion      String    @unique @db.Uuid
+  claveLiberacion      String?   @unique @db.Uuid
+  creadoEn             DateTime  @default(now()) @db.Timestamptz(3)
+  actualizadoEn        DateTime  @default(now()) @updatedAt @db.Timestamptz(3)
+
+  licencia    Licencia @relation(fields: [idLicencia], references: [idLicencia], onDelete: Restrict, onUpdate: Restrict)
+  empleado    Empleado @relation(fields: [idEmpleado], references: [idEmpleado], onDelete: Restrict, onUpdate: Restrict)
+  asignadoPor Usuario  @relation("UsuarioAsignacion", fields: [idUsuarioAsignacion], references: [idUsuario], onDelete: Restrict, onUpdate: Restrict)
+  liberadoPor Usuario? @relation("UsuarioLiberacion", fields: [idUsuarioLiberacion], references: [idUsuario], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([idLicencia, liberadoEn])
+  @@index([idEmpleado, liberadoEn])
+  // La unicidad por contrato y empleado mientras esté abierta está en SQL.
+  @@map("AsignacionesLicencias")
+}
+
+model Mantenimiento {
+  idMantenimiento String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  idActivo        String    @db.Uuid
+  idUsuarioInicio String    @db.Uuid
+  iniciadoEn      DateTime  @default(now()) @db.Timestamptz(3)
+  notaInicial     String
+  idUsuarioCierre String?   @db.Uuid
+  cerradoEn       DateTime? @db.Timestamptz(3)
+  resolucion      String?
+  claveInicio     String    @unique @db.Uuid
+  claveCierre     String?   @unique @db.Uuid
+  creadoEn        DateTime  @default(now()) @db.Timestamptz(3)
+  actualizadoEn   DateTime  @default(now()) @updatedAt @db.Timestamptz(3)
+
+  activo      Activo   @relation(fields: [idActivo], references: [idActivo], onDelete: Restrict, onUpdate: Restrict)
+  iniciadoPor Usuario  @relation("UsuarioInicio", fields: [idUsuarioInicio], references: [idUsuario], onDelete: Restrict, onUpdate: Restrict)
+  cerradoPor  Usuario? @relation("UsuarioCierre", fields: [idUsuarioCierre], references: [idUsuario], onDelete: Restrict, onUpdate: Restrict)
+
+  @@index([idActivo, iniciadoEn])
+  // El índice único de mantenimientos abiertos se conserva en SQL.
+  @@map("Mantenimientos")
+}
