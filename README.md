@@ -1,33 +1,70 @@
-# Backend de AssetOps Móvil
+# AssetOps Móvil — Backend
 
-Base compartida para comenzar el proyecto: PostgreSQL local, las siete tablas aprobadas, sus relaciones y restricciones, conexión con Prisma y carpetas para CQRS.
+Equipo, esta es la base con la que vamos a empezar el backend. Les dejo esta guía para que cada quien pueda preparar su computadora, entender los archivos y trabajar con la misma estructura.
 
-Cada integrante instala su propia base. GitHub comparte el código y las migraciones para mantener la misma estructura; los registros locales de cada compañero son independientes.
+Vamos a usar `main` como nuestra versión compartida. Cada quien tendrá su propia base de datos local: compartimos el código y las migraciones por GitHub, pero los registros que guardemos en nuestras computadoras son independientes.
 
-## 1. Requisitos
+## 1. Qué tenemos en esta base
 
-- Git y VS Code.
-- Node.js **26.8.2**, con npm. La versión está indicada en `.nvmrc`.
+Ya tenemos PostgreSQL en Docker, las siete tablas aprobadas con sus relaciones y restricciones, la conexión con Prisma y una comprobación que consulta todas las tablas. También dejamos las carpetas `commands` y `queries` para desarrollar las historias con CQRS.
+
+Esta etapa prepara la base de datos y su conexión. El servidor con Express, el acceso del administrador y las funciones de las historias los iremos agregando conforme avancemos. Todavía no hay una cuenta administrativa creada ni endpoints para conectar las pantallas.
+
+Usamos estas herramientas:
+
+| Herramienta | Para qué la ocupamos |
+| --- | --- |
+| Node.js y TypeScript | Ejecutar las herramientas y escribir el código del backend. |
+| PostgreSQL | Guardar la información de la aplicación. |
+| Docker Compose | Ejecutar la misma versión de PostgreSQL en cada computadora. |
+| Prisma | Definir el modelo, aplicar migraciones y consultar la base desde TypeScript. |
+| Git y GitHub | Compartir y revisar los cambios del proyecto. |
+
+## 2. Preparar nuestra computadora
+
+Antes de comenzar necesitamos:
+
+- Git.
+- VS Code.
+- Node.js **26.8.2**, con npm.
 - Docker Desktop instalado y abierto, usando contenedores Linux.
 
-No hace falta instalar PostgreSQL por separado: Docker lo ejecuta con la versión fijada en `compose.yaml`.
+No necesitamos instalar PostgreSQL por separado. Docker lo ejecutará con la versión definida en `compose.yaml`.
 
-## 2. Descargar el backend
-
-Esta primera entrega está en la rama `codex/base-datos-local`. Hasta que se integre en `dev`, todos pueden descargar exactamente esta base con:
+Para comprobar Node y las herramientas podemos ejecutar:
 
 ```bash
-git clone --branch codex/base-datos-local https://github.com/NavaSao/inventarioBackend.git
+node --version
+npm --version
+git --version
+docker compose version
+```
+
+Node debe mostrar `v26.8.2`. Si usamos nvm en macOS o Linux, dentro del proyecto podemos ejecutar `nvm install` y `nvm use` para tomar la versión de `.nvmrc`. En Windows podemos instalar esa versión directamente o seleccionarla con nvm-windows.
+
+## 3. Descargar el proyecto desde main
+
+Para una instalación nueva:
+
+```bash
+git clone --branch main https://github.com/NavaSao/inventarioBackend.git
 cd inventarioBackend
 ```
 
-Abre esa carpeta en VS Code y usa su terminal. Si ya tienes el repositorio, conserva tus cambios antes de cambiar de rama; no necesitas volver a clonarlo.
+Después abrimos la carpeta `inventarioBackend` en VS Code. Todos los comandos de esta guía se ejecutan desde esa carpeta, donde está `package.json`.
 
-Si usas nvm en macOS o Linux, ejecuta `nvm install` y `nvm use`. En Windows selecciona Node 26.8.2 con tu instalación habitual o nvm-windows. Comprueba `node --version` antes de continuar.
+Si ya tienen el repositorio, no hace falta clonarlo otra vez. Primero guarden sus cambios en su rama de trabajo y después actualicen:
 
-## 3. Preparar la configuración local
+```bash
+git switch main
+git pull --ff-only origin main
+```
 
-Copia `.env.example` y llama `.env` a la copia. Puedes hacerlo desde VS Code, o con uno de estos comandos, solo si aún no existe `.env`:
+## 4. Crear nuestro archivo .env
+
+Dentro del proyecto está `.env.example`. Cada quien debe hacer una copia llamada `.env`.
+
+Podemos copiarlo desde VS Code o usar uno de estos comandos, solamente si todavía no tenemos `.env`:
 
 macOS o Linux:
 
@@ -41,23 +78,25 @@ Windows PowerShell:
 Copy-Item .env.example .env
 ```
 
-Dentro de `.env`, reemplaza `CAMBIA_ESTA_CLAVE_LOCAL` por tu contraseña local en **ambos lugares**: `POSTGRES_PASSWORD` y `DATABASE_URL`. Para esta instalación sencilla usa letras y números, evitando caracteres que necesiten codificarse en una URL. No modifiques un `.env` que ya funciona.
+Luego abrimos `.env` y cambiamos `CAMBIA_ESTA_CLAVE_LOCAL` por nuestra contraseña local en los dos lugares: `POSTGRES_PASSWORD` y `DATABASE_URL`.
 
-Valores de conexión de esta base:
+```env
+POSTGRES_USER=assetops
+POSTGRES_PASSWORD=CAMBIA_ESTA_CLAVE_LOCAL
+POSTGRES_DB=assetops
+POSTGRES_PORT=5433
+DATABASE_URL=postgresql://assetops:CAMBIA_ESTA_CLAVE_LOCAL@127.0.0.1:5433/assetops?schema=public
+```
 
-| Dato | Valor |
-| --- | --- |
-| Servidor | `127.0.0.1` |
-| Puerto de tu computadora | `5433` |
-| Base | `assetops` |
-| Usuario de PostgreSQL | `assetops` |
-| Contraseña | La que configuraste en tu `.env` |
+Para esta configuración sencilla podemos usar una contraseña local de letras y números, evitando caracteres que necesiten codificarse dentro de la URL. Cada quien puede tener una contraseña diferente; en su propio archivo debe coincidir en ambos lugares.
 
-Este usuario pertenece a PostgreSQL. La cuenta administrativa de la aplicación se configurará al desarrollar el acceso; todavía no hay una cuenta creada.
+La conexión apunta a la base `assetops`, en nuestra computadora (`127.0.0.1`), por el puerto `5433`. El usuario `assetops` pertenece a PostgreSQL; es distinto del administrador que después entrará a la aplicación.
 
-## 4. Instalar y comprobar
+`.env` queda fuera de Git. Compartimos `.env.example` para que todos conozcamos qué variables configurar. Si ya tienen un `.env` funcionando, consérvenlo.
 
-Con Docker Desktop abierto, ejecuta desde la carpeta del backend:
+## 5. Instalar y levantar la base
+
+Con Docker Desktop abierto y `.env` configurado:
 
 ```bash
 npm ci
@@ -65,92 +104,185 @@ npm run db:setup
 npm run typecheck
 ```
 
-`npm ci` instala las versiones guardadas en `package-lock.json`. `db:setup` inicia PostgreSQL, genera el cliente Prisma, aplica las migraciones pendientes y consulta las siete tablas. Puede volver a ejecutarse: aplica únicamente las migraciones pendientes y conserva los datos.
+Esto es lo que hace cada comando:
 
-El resultado debe incluir **Conexión correcta con PostgreSQL.** y una tabla con la cantidad de registros de cada tabla. En una instalación nueva los siete valores son cero.
+| Comando | Qué pasa al ejecutarlo |
+| --- | --- |
+| `npm ci` | Instala las versiones guardadas en `package-lock.json`. |
+| `npm run db:setup` | Inicia PostgreSQL, genera el cliente Prisma, aplica las migraciones pendientes y consulta las siete tablas. |
+| `npm run typecheck` | Revisa que el código TypeScript no tenga errores de tipos. |
 
-Las tablas y los datos se conservan en el volumen `postgres_data` de Docker, aunque detengas el servicio. No elimines ese volumen para actualizar el proyecto.
+Al terminar `db:setup` debemos ver **Conexión correcta con PostgreSQL.** y una tabla con el número de registros de cada tabla. En una instalación nueva, los siete valores son cero. `typecheck` debe terminar sin errores.
 
-## 5. Entender los archivos
+Podemos volver a ejecutar `db:setup` para actualizar el entorno: aplica las migraciones pendientes y conserva los registros existentes. Los datos permanecen en el volumen de Docker aunque detengamos PostgreSQL.
+
+## 6. Ver las tablas y usar la base cada día
+
+Para explorar las tablas desde el navegador:
+
+```bash
+npm run db:studio
+```
+
+Abrimos la dirección que aparezca en la terminal. Prisma Studio nos permite ver y editar registros; cualquier edición que hagamos ahí afecta nuestra base local. Para cerrar Studio usamos Ctrl+C en esa terminal.
+
+Para detener PostgreSQL conservando los datos:
+
+```bash
+npm run db:down
+```
+
+Cuando volvamos a trabajar, abrimos Docker Desktop y ejecutamos:
+
+```bash
+npm run db:up
+npm run db:check
+```
+
+No necesitamos reinstalar las dependencias cada vez que abrimos VS Code. Lo hacemos al preparar el proyecto o cuando actualizamos dependencias compartidas.
+
+## 7. Qué hace cada parte del proyecto
 
 ```text
 prisma/
-  schema.prisma              Las siete tablas, sus campos y relaciones
-  migrations/                Instrucciones SQL versionadas para crear y cambiar la base
+  schema.prisma              Modelo de las siete tablas y sus relaciones
+  migrations/                SQL para crear y actualizar la estructura
 src/
-  database/prisma.ts         Cliente compartido para conectarnos a PostgreSQL
-  comprobarConexion.ts       Consulta las siete tablas sin modificar registros
-  commands/.gitkeep          Conserva la carpeta de futuras operaciones de escritura
-  queries/.gitkeep           Conserva la carpeta de futuras consultas
-compose.yaml                 PostgreSQL local y almacenamiento de sus datos
-prisma.config.ts             Ubicación del modelo, migraciones y conexión
-.env.example                 Plantilla sin contraseñas reales
-package.json                 Dependencias y comandos
+  commands/.gitkeep          Carpeta inicial para operaciones que cambian datos
+  queries/.gitkeep           Carpeta inicial para operaciones de lectura
+  database/prisma.ts         Cliente compartido de conexión
+  comprobarConexion.ts       Comprueba la conexión consultando las siete tablas
+.env.example                 Plantilla de configuración local
+compose.yaml                 PostgreSQL en Docker y almacenamiento de sus datos
+prisma.config.ts             Configuración de las herramientas de Prisma
+package.json                 Dependencias y comandos del proyecto
 package-lock.json            Versiones exactas de las dependencias
 tsconfig.json                Configuración de TypeScript
+.gitignore                   Archivos que dejamos fuera de Git
+.gitattributes               Finales de línea consistentes entre computadoras
+.nvmrc                       Versión de Node para nvm
+.npmrc                       Configuración de npm para guardar versiones exactas
+README.md                    Esta guía
 ```
 
-`src/generated/prisma` se crea con `db:generate`. No se edita a mano ni se sube a GitHub. `node_modules` también se genera al instalar las dependencias.
+Estos son los archivos principales que conviene revisar en orden:
 
-Para conocer el código, empieza por `schema.prisma`, sigue con `src/database/prisma.ts` y termina con `src/comprobarConexion.ts`.
-
-## 6. Las siete tablas y sus reglas
-
-| Tabla | Qué representa |
+| Archivo | Cómo lo manejamos |
 | --- | --- |
-| Usuarios | Cuentas del único rol: administrador de TI. |
-| Empleados | Personas que reciben activos o licencias, sin iniciar sesión. |
-| Activos | Equipos, sus datos, ubicación, etiqueta y estado. |
-| AsignacionesActivos | Historial de entregas y devoluciones de equipos. |
-| Licencias | Contratos de software, vigencia, costo y cupos. |
-| AsignacionesLicencias | Historial de cupos asignados a empleados y liberados. |
-| Mantenimientos | Inicio y cierre de los servicios de un activo. |
+| `prisma/schema.prisma` | Aquí vemos campos, llaves y relaciones. Si acordamos cambiar la estructura, editamos el modelo y creamos una nueva migración. |
+| `prisma/migrations/` | Compartimos estas instrucciones para que todos creemos la misma estructura. No editamos migraciones que ya se compartieron y aplicaron. |
+| `prisma.config.ts` | Indica dónde están el modelo y las migraciones, y obtiene `DATABASE_URL` para los comandos de Prisma. |
+| `src/database/prisma.ts` | Lee la conexión de `.env` y exporta `prisma`. Lo reutilizaremos desde los comandos y consultas. |
+| `src/comprobarConexion.ts` | Cuenta los registros de las siete tablas, muestra los resultados y cierra la conexión al terminar. No modifica registros. |
+| `compose.yaml` | Define la versión de PostgreSQL, el puerto, la configuración y el volumen donde se guardan los datos. |
+| `package.json` | Reúne los comandos que usamos en esta guía y las dependencias que necesita el proyecto. |
 
-Las llaves conservan los nombres aprobados, por ejemplo `Activos.idActivo` y `AsignacionesActivos.idActivo`. Las relaciones evitan referencias a registros inexistentes y protegen el historial contra eliminaciones de registros relacionados.
+El recorrido de nuestra comprobación es:
 
-La migración ya protege, entre otras condiciones:
+```text
+npm run db:check
+        ↓
+src/comprobarConexion.ts
+        ↓
+src/database/prisma.ts
+        ↓
+Cliente Prisma y adaptador PostgreSQL
+        ↓
+PostgreSQL en Docker
+```
+
+Al instalar aparecen `node_modules` y `src/generated/prisma`. Son archivos de dependencias y código generado; no los editamos a mano ni los subimos al repositorio. El cliente se reconstruye con `npm run db:generate`. Los archivos `.gitkeep` solo permiten conservar las carpetas vacías en Git.
+
+## 8. Cómo está organizada la base de datos
+
+| Tabla | Qué guardamos |
+| --- | --- |
+| Usuarios | Las cuentas del único rol: administrador de TI. |
+| Empleados | Las personas que reciben activos o licencias; no necesitan iniciar sesión. |
+| Activos | Los equipos, su etiqueta, sus datos y su estado. |
+| AsignacionesActivos | Las entregas y devoluciones de equipos, conservando el historial. |
+| Licencias | Los contratos de software, su vigencia, costo y cupos. |
+| AsignacionesLicencias | Los cupos asignados a empleados y sus liberaciones. |
+| Mantenimientos | Los servicios de un activo, desde su inicio hasta su cierre. |
+
+Conservamos los nombres aprobados de las llaves. Por ejemplo, `Activos.idActivo` se relaciona con `AsignacionesActivos.idActivo`. Las relaciones evitan referencias a registros inexistentes y restringen la eliminación de registros que tienen movimientos relacionados.
+
+La base ya protege condiciones como estas:
 
 - Correos, números de empleado, series y etiquetas sin duplicados en sus tablas correspondientes.
-- Una sola asignación abierta por activo, un solo mantenimiento abierto por activo y un solo cupo abierto por licencia y empleado.
-- Fechas de cierre coherentes y datos de devolución, liberación o cierre completos.
-- Costo no negativo, cupos contratados positivos y fechas de vigencia en orden.
+- Una sola asignación abierta por activo y un solo mantenimiento abierto por activo.
+- Un solo cupo abierto por contrato de licencia y empleado.
+- Fechas coherentes y datos completos para cerrar devoluciones, liberaciones y mantenimientos.
+- Cupos contratados positivos, costo no negativo y vigencia en orden.
 - Fecha y motivo obligatorios cuando un activo está dado de baja.
 
-Los correos deben guardarse en minúsculas y sin espacios en los extremos; números de empleado, series y etiquetas, en mayúsculas y sin esos espacios. La base rechaza formatos incorrectos; no los transforma automáticamente.
+Los correos deben guardarse en minúsculas y sin espacios en los extremos. Los números de empleado, series y etiquetas deben ir en mayúsculas y sin esos espacios. La base rechaza formatos incorrectos; no los corrige automáticamente.
 
-Al desarrollar las historias, los comandos deberán comprobar además que el empleado esté activo, que el equipo esté disponible, que no se excedan los cupos y que la licencia esté vigente. También deberán coordinar estados y movimientos en una misma transacción. Estas reglas que relacionan varias tablas todavía no son funciones implementadas.
+Al implementar las historias agregaremos en los comandos las comprobaciones que requieren revisar varias tablas: empleado activo, equipo disponible, vigencia, cupos y desactivación de empleados con asignaciones abiertas. También coordinaremos los cambios de estado y sus movimientos en una misma transacción.
 
-Prisma añade `_prisma_migrations` para registrar las migraciones aplicadas. Es una tabla técnica.
+Prisma añade `_prisma_migrations` para registrar qué migraciones se aplicaron. Es una tabla técnica, además de las siete tablas del proyecto.
 
-## 7. Trabajar con CQRS sin agregar capas innecesarias
+## 9. Cómo vamos a usar CQRS
 
-- `src/commands/`: operaciones que cambian datos, como registrar un empleado o entregar un activo.
-- `src/queries/`: operaciones que solo leen datos, como listar activos o consultar su historial.
-- Ambas reutilizan el cliente de `src/database/prisma.ts` y la misma base PostgreSQL.
+Vamos a separar las operaciones según lo que hacen:
 
-Al comenzar una historia, agrega únicamente sus archivos. Por ejemplo, `commands/empleados/crearEmpleado.ts` y `queries/empleados/listarEmpleados.ts`. Mantén en el comando las validaciones del negocio y los cambios que deban ocurrir juntos.
+| Carpeta | Qué agregamos ahí | Ejemplo |
+| --- | --- | --- |
+| `src/commands/` | Funciones que cambian información. | Registrar un empleado o entregar un activo. |
+| `src/queries/` | Funciones que leen información. | Listar activos o consultar un historial. |
+| `src/database/` | La conexión que reutilizan ambas. | El cliente `prisma`. |
 
-La base actual cubre la persistencia. Cuando conectemos el frontend, incorporaremos el servidor HTTP con Express y las rutas de cada historia. El acceso, las pantallas y las operaciones del negocio se desarrollarán en esas etapas.
+Cuando empecemos una historia, creamos únicamente los archivos que necesitemos. Por ejemplo:
 
-## 8. Mantener al equipo en la misma versión
-
-Proponemos integrar los cambios en `dev` mediante Pull Requests. Esta entrega tiene su propia rama para revisarla antes de integrarla. Evita trabajar directamente en la rama de otro compañero.
-
-Una vez integrada la base en `dev`, empieza una historia con:
-
-```bash
-git switch dev
-git pull --ff-only origin dev
-npm ci
-npm run db:setup
-git switch -c feature/nombre-de-la-historia
+```text
+src/commands/empleados/crearEmpleado.ts
+src/queries/empleados/listarEmpleados.ts
 ```
 
-Antes de cambiar de rama, guarda tus cambios en tu rama de trabajo. Cuando termines una historia, ejecuta `npm run typecheck` y `npm run db:check`, prueba su comportamiento y comparte un Pull Request hacia `dev`.
+Son ejemplos de organización; esos archivos todavía no existen. Los comandos contendrán las reglas del negocio y las transacciones que correspondan. Las consultas recuperarán datos sin cambiar registros del negocio. Ambos usarán la misma base PostgreSQL.
 
-Si otro compañero añade una migración, al actualizar ejecuta de nuevo `npm ci` y `npm run db:setup`. Así mantienes la misma estructura sin copiar archivos de la base ni borrar tus registros.
+## 10. Cómo compartir nuestros avances
 
-**Solo quien cambia el modelo crea una nueva migración.** Coordinen ese cambio para evitar modificar los mismos campos en paralelo. Después de editar `schema.prisma`, usa:
+`main` será el punto de partida común. Para mantenerlo funcionando, propongo que cada historia se trabaje en una rama propia y se integre mediante un Pull Request hacia `main`, después de revisarla.
+
+Antes de empezar una historia, guardamos nuestros cambios pendientes y actualizamos:
+
+```bash
+git switch main
+git pull --ff-only origin main
+npm ci
+npm run db:setup
+git switch -c feature/registro-empleados
+```
+
+El nombre `feature/registro-empleados` es un ejemplo; cada quien usará uno relacionado con su tarea. Así empezamos desde la última base compartida y trabajamos en nuestra propia rama.
+
+Al terminar, comprobamos lo que hicimos:
+
+```bash
+npm run typecheck
+npm run db:check
+```
+
+Además probamos el comportamiento de nuestra historia. Estos dos comandos revisan los tipos y el acceso a las tablas; no prueban por sí solos todas las reglas de una función nueva.
+
+Después revisamos qué archivos vamos a compartir, guardamos el cambio y publicamos nuestra rama:
+
+```bash
+git status
+git diff
+git add .
+git commit -m "Agrega registro de empleados"
+git push -u origin feature/registro-empleados
+```
+
+En GitHub abrimos un Pull Request con `main` como destino y nuestra rama como origen. Describimos qué cambió y cómo lo comprobamos. Después de revisar e integrar el cambio, los demás actualizan `main` y vuelven a ejecutar `npm ci` y `npm run db:setup`.
+
+## 11. Qué hacemos cuando cambia la estructura
+
+Primero acordamos el cambio con el equipo. Solo quien modifica el modelo crea la nueva migración; los demás la aplican al actualizar el proyecto.
+
+Después de editar `prisma/schema.prisma`, quien hace el cambio ejecuta:
 
 ```bash
 npm run db:migrate:dev -- --name descripcion_del_cambio
@@ -159,38 +291,49 @@ npm run typecheck
 npm run db:check
 ```
 
-Revisa el SQL generado y sube el modelo y la nueva migración en el mismo Pull Request. Algunas restricciones están escritas directamente en SQL: deben conservarse. Si Prisma propone reiniciar una base con datos, detente y revisa la diferencia con el equipo.
+Revisamos el SQL generado y compartimos el modelo y la nueva migración en el mismo Pull Request. Algunas restricciones están escritas directamente en SQL y deben conservarse. Si Prisma propone reiniciar una base con datos, revisamos la diferencia antes de aceptar.
 
-No edites migraciones ya compartidas y aplicadas. No uses `db push` o un reinicio de la base como forma de sincronizar al equipo.
+Los demás, después de descargar el cambio integrado, ejecutan:
 
-Se comparten código, modelo, migraciones, configuración de ejemplo y el archivo de versiones. `.env`, contraseñas, dependencias, cliente generado, fotos cargadas y los datos locales quedan fuera de Git.
+```bash
+npm ci
+npm run db:setup
+```
 
-## 9. Comandos de uso diario
+No copiamos tablas a mano ni borramos el volumen para ponernos al día. No editamos migraciones que ya se aplicaron y no usamos `db push` para sincronizar al equipo.
 
-| Comando | Resultado |
+## 12. Qué compartimos en GitHub
+
+Compartimos código, modelo, migraciones, esta guía, configuración de ejemplo y archivos de dependencias. Así cada quien puede reconstruir el entorno.
+
+Dejamos fuera `.env`, contraseñas, datos locales, fotos cargadas, `node_modules`, `dist` y `src/generated/prisma`. `.gitignore` ya contempla esas exclusiones.
+
+## 13. Comandos a la mano
+
+| Comando | Para qué lo usamos |
 | --- | --- |
-| `npm run db:setup` | Prepara o actualiza la base y comprueba las siete tablas. |
-| `npm run db:up` | Inicia PostgreSQL. |
-| `npm run db:down` | Detiene PostgreSQL conservando los datos. |
-| `npm run db:status` | Muestra el estado del servicio. |
-| `npm run db:check` | Comprueba la conexión y cuenta los registros de las siete tablas. |
-| `npm run db:generate` | Regenera el cliente después de un cambio del modelo. |
-| `npm run db:migrate` | Aplica las migraciones existentes. |
-| `npm run db:migrate:dev -- --name descripcion` | Crea y aplica una migración durante el desarrollo. |
-| `npm run db:studio` | Inicia el visor de tablas en el puerto 5555. |
-| `npm run typecheck` | Revisa los tipos de TypeScript. |
+| `npm ci` | Instalar las dependencias con las versiones compartidas. |
+| `npm run db:setup` | Preparar o actualizar la base y comprobar las siete tablas. |
+| `npm run db:up` | Iniciar PostgreSQL. |
+| `npm run db:down` | Detener PostgreSQL conservando los datos. |
+| `npm run db:status` | Ver el estado del servicio. |
+| `npm run db:check` | Comprobar la conexión y contar los registros. |
+| `npm run db:generate` | Regenerar el cliente Prisma. |
+| `npm run db:migrate` | Aplicar las migraciones existentes. |
+| `npm run db:migrate:dev -- --name descripcion` | Crear y aplicar una migración durante el desarrollo. |
+| `npm run db:studio` | Abrir el visor de tablas en el puerto 5555. |
+| `npm run typecheck` | Revisar los tipos del código. |
 
-Para explorar las tablas, ejecuta `npm run db:studio` y abre la dirección que aparece en la terminal. Usa Ctrl+C para cerrar el visor.
+## 14. Si algo no funciona
 
-## 10. Problemas frecuentes
-
-| Situación | Qué revisar |
+| Problema | Qué podemos revisar |
 | --- | --- |
-| Docker no responde | Abre Docker Desktop y espera a que termine de iniciar. |
-| El puerto 5433 está ocupado | Cambia `POSTGRES_PORT` y el puerto de `DATABASE_URL` al mismo número libre. |
-| Error de contraseña | Revisa que coincida en ambos lugares de `.env`. Si la base ya existía, utiliza la contraseña con la que se creó: editar `.env` no cambia la contraseña almacenada en PostgreSQL. |
-| Faltan tablas | Ejecuta `npm run db:setup` para aplicar las migraciones. |
-| Falta el cliente generado | Ejecuta `npm run db:generate`. |
-| Hay errores de versión de Node | Comprueba que usas Node 26.8.2 y vuelve a ejecutar `npm ci`. |
+| Docker no responde | Abrimos Docker Desktop y esperamos a que termine de iniciar. |
+| El puerto 5433 está ocupado | Cambiamos `POSTGRES_PORT` y el puerto de `DATABASE_URL` al mismo número libre. |
+| PostgreSQL rechaza la contraseña | Revisamos que coincida en ambos lugares de `.env`. Si la base ya existía, usamos la contraseña con la que se creó: editar `.env` no cambia la contraseña guardada en PostgreSQL. |
+| Faltan tablas | Ejecutamos `npm run db:setup` para aplicar las migraciones. |
+| Falta el cliente generado | Ejecutamos `npm run db:generate`. |
+| Hay errores de versión de Node | Comprobamos que usamos Node 26.8.2 y ejecutamos `npm ci` otra vez. |
+| No podemos cambiar de rama porque hay cambios pendientes | Guardamos nuestros cambios en nuestra rama antes de cambiar; no los descartamos para continuar. |
 
-La instalación se comprueba cuando `db:check` puede consultar las siete tablas y `typecheck` termina sin errores.
+Cuando las siete tablas se puedan consultar y `typecheck` termine sin errores, tendremos lista esta base para empezar nuestras historias.
