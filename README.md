@@ -145,6 +145,14 @@ Envíen `POST http://127.0.0.1:3000/api/auth/login` con `Content-Type: applicati
 
 Para la validación de sesión, el JWT lleva el ID de la cuenta en `sub`, `versionSesion` y un vencimiento de una hora. La firma usa `HS256` con la clave local del backend. Durante el sprint, abrimos los Pull Requests de cada tarea hacia `sprint-1`.
 
+### Probar la validación de sesión del sprint 1
+
+Para consultar si la sesión guardada sigue activa, envíen `GET http://127.0.0.1:3000/api/auth/session` con la cabecera `Authorization: Bearer <token>`:
+
+- `200` devuelve los datos de la cuenta: `{ "idUsuario": "...", "nombre": "...", "correo": "..." }`.
+- `401` devuelve error si el token expiró, la firma no coincide, la cuenta está inactiva o la versión de sesión cambió.
+
+
 ## 6. Ver las tablas y usar la base cada día
 
 Para explorar las tablas desde el navegador:
