@@ -16,3 +16,16 @@ export function firmarToken(idUsuario: string, versionSesion: number): string {
     expiresIn: '1h',
   });
 }
+
+export function verificarToken(token: string) {
+  try {
+    return jwt.verify(token, configuracionJwt.secreto) as {
+      sub: string;
+      versionSesion: number;
+    };
+  } catch {
+    return null;
+  }
+}
+
+
