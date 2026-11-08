@@ -8,7 +8,7 @@ Vamos a usar `main` como nuestra versión compartida. Cada quien tendrá su prop
 
 Ya tenemos PostgreSQL en Docker, las siete tablas aprobadas con sus relaciones y restricciones, la conexión con Prisma y una comprobación que consulta todas las tablas. También dejamos las carpetas `commands` y `queries` para desarrollar las historias con CQRS.
 
-Esta etapa prepara la base de datos y su conexión. El servidor con Express, el acceso del administrador y las funciones de las historias los iremos agregando conforme avancemos. Todavía no hay una cuenta administrativa creada ni endpoints para conectar las pantallas.
+En el primer sprint agregué el servidor con Express y el inicio de sesión. Cada integrante crea su cuenta de prueba en su propia base.
 
 Usamos estas herramientas:
 
@@ -115,6 +115,35 @@ Esto es lo que hace cada comando:
 Al terminar `db:setup` debemos ver **Conexión correcta con PostgreSQL.** y una tabla con el número de registros de cada tabla. En una instalación nueva, los siete valores son cero. `typecheck` debe terminar sin errores.
 
 Podemos volver a ejecutar `db:setup` para actualizar el entorno: aplica las migraciones pendientes y conserva los registros existentes. Los datos permanecen en el volumen de Docker aunque detengamos PostgreSQL.
+
+### Probar el login del sprint 1
+
+En su `.env`, pongan un correo en `ADMIN_CORREO`, una contraseña de prueba en `ADMIN_PASSWORD` (de 12 caracteres como mínimo y hasta 72 bytes) y una clave aleatoria propia en `JWT_SECRET`. Pueden generar la clave con este comando y copiar el resultado a su `.env`:
+
+```bash
+node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+```
+
+Una vez configurado su `.env`, creen la cuenta y arranquen el servidor:
+
+```bash
+npm run admin:crear
+npm run dev
+```
+
+Si la cuenta ya existe, `admin:crear` la conserva. Para una prueba desde el celular en la misma red, configuren `HOST=0.0.0.0` y usen la IP de la computadora en la app.
+
+Envíen `POST http://127.0.0.1:3000/api/auth/login` con `Content-Type: application/json` y el correo y la contraseña que configuraron:
+
+```json
+{ "correo": "admin@assetops.test", "password": "su-contraseña-local" }
+```
+
+- `200` devuelve `{ "token": "..." }`.
+- `400` indica que hay que corregir los datos.
+- `401` devuelve `{ "mensaje": "Acceso inválido" }` para una clave incorrecta, una cuenta inactiva o un correo que no existe.
+
+Para la validación de sesión, el JWT lleva el ID de la cuenta en `sub`, `versionSesion` y un vencimiento de una hora. La firma usa `HS256` con la clave local del backend. Durante el sprint, abrimos los Pull Requests de cada tarea hacia `sprint-1`.
 
 ## 6. Ver las tablas y usar la base cada día
 
