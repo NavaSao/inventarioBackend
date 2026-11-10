@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import express, { type ErrorRequestHandler } from 'express';
-import { rutasAuth } from './auth/login.routes.js';
+import { rutasAuth } from './auth/auth.routes.js';
 
 const app = express();
 const host = process.env.HOST || '127.0.0.1';
