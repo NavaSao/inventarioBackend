@@ -1,12 +1,10 @@
-import { Router } from 'express';
+import type { Request, Response } from 'express';
 import { iniciarSesion } from '../commands/auth/iniciarSesion.js';
 import { obtenerSesion } from '../queries/auth/obtenerSesion.js';
 import { credencialesSchema } from './credenciales.js';
 import { verificarToken } from './token.js';
 
-export const rutasAuth = Router();
-
-rutasAuth.post('/login', async (req, res) => {
+export async function login(req: Request, res: Response): Promise<void> {
   const entrada = credencialesSchema.safeParse(req.body);
   if (!entrada.success) {
     res.status(400).json({ mensaje: 'Revisa el correo y la contraseña' });
@@ -23,9 +21,9 @@ rutasAuth.post('/login', async (req, res) => {
   }
 
   res.set('Cache-Control', 'no-store').json({ token });
-});
+}
 
-export async function consultarSesion(req: any, res: any) {
+export async function consultarSesion(req: Request, res: Response): Promise<void> {
   const header = req.headers.authorization;
   const token = header?.startsWith('Bearer ') ? header.slice(7) : null;
 
@@ -50,8 +48,3 @@ export async function consultarSesion(req: any, res: any) {
 
   res.status(200).json(usuario);
 }
-
-rutasAuth.get(['/session', '/sesion'], consultarSesion);
-
-
-
