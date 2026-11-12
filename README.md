@@ -185,9 +185,15 @@ prisma/
   schema.prisma              Modelo de las siete tablas y sus relaciones
   migrations/                SQL para crear y actualizar la estructura
 src/
-  commands/.gitkeep          Carpeta inicial para operaciones que cambian datos
-  queries/.gitkeep           Carpeta inicial para operaciones de lectura
+  core/
+    cqrs/                    Interfaces y buses en memoria para comandos y consultas
+    interfaces/              Contratos de repositorios y servicios (DIP e ISP)
+  commands/                  Operaciones que cambian información (Comandos y Handlers)
+  queries/                   Operaciones de lectura y DTOs (Consultas y Handlers)
+  infrastructure/            Implementaciones técnicas (Prisma, Bcrypt, JWT)
+  auth/                      Controlador, rutas y validaciones del módulo de autenticación
   database/prisma.ts         Cliente compartido de conexión
+  container.ts               Contenedor de inyección de dependencias (Composition Root)
   comprobarConexion.ts       Comprueba la conexión consultando las siete tablas
 .env.example                 Plantilla de configuración local
 compose.yaml                 PostgreSQL en Docker y almacenamiento de sus datos
@@ -259,24 +265,51 @@ Al implementar las historias agregaremos en los comandos las comprobaciones que 
 
 Prisma añade `_prisma_migrations` para registrar qué migraciones se aplicaron. Es una tabla técnica, además de las siete tablas del proyecto.
 
-## 9. Cómo vamos a usar CQRS
+## 9. Cómo usamos CQRS y SOLID
 
-Vamos a separar las operaciones según lo que hacen:
+El backend implementa el patrón **CQRS (Command Query Responsibility Segregation)** estructurado bajo los principios **SOLID**:
 
-| Carpeta | Qué agregamos ahí | Ejemplo |
+### 9.1. Segregación CQRS
+
+Separamos las intenciones de escritura de las de lectura mediante objetos de comando/consulta y manejadores dedicados:
+
+| Componente | Responsabilidad | Ejemplo |
 | --- | --- | --- |
-| `src/commands/` | Funciones que cambian información. | Registrar un empleado o entregar un activo. |
-| `src/queries/` | Funciones que leen información. | Listar activos o consultar un historial. |
-| `src/database/` | La conexión que reutilizan ambas. | El cliente `prisma`. |
+| `src/core/cqrs/` | Define `ICommand`, `IQuery`, `ICommandHandler`, `IQueryHandler`, `ICommandBus` y `IQueryBus`. | `InMemoryCommandBus` y `InMemoryQueryBus`. |
+| `src/commands/` | Comandos (intención de mutar datos) y sus Command Handlers. | `IniciarSesionCommand`, `CrearAdminCommand`. |
+| `src/queries/` | Consultas (recuperación de datos sin efectos secundarios), DTOs y Query Handlers. | `ObtenerSesionQuery`, `DatosSesion`. |
+| `src/container.ts` | Ensambla las dependencias (Composition Root) y registra los manejadores en los buses. | Registro centralizado de buses. |
 
-Cuando empecemos una historia, creamos únicamente los archivos que necesitemos. Por ejemplo:
-
+El flujo de una petición a través de CQRS es:
 ```text
-src/commands/empleados/crearEmpleado.ts
-src/queries/empleados/listarEmpleados.ts
+Controlador Express
+       ↓ (despacha Comando o Consulta)
+CommandBus / QueryBus
+       ↓ (enruta al manejador registrado)
+CommandHandler / QueryHandler
+       ↓ (usa abstracciones inyectadas)
+Repositorios / Servicios de Seguridad
 ```
 
-Son ejemplos de organización; esos archivos todavía no existen. Los comandos contendrán las reglas del negocio y las transacciones que correspondan. Las consultas recuperarán datos sin cambiar registros del negocio. Ambos usarán la misma base PostgreSQL.
+### 9.2. Cumplimiento de Principios SOLID
+
+1. **S — Single Responsibility Principle (SRP)**:
+   - Los controladores solo gestionan HTTP (códigos de estado, cabeceras, respuesta JSON).
+   - Cada *Handler* solo ejecuta la lógica de negocio de su comando o consulta específica.
+   - Los repositorios solo se encargan del acceso a datos.
+   - `BcryptPasswordHasher` y `JwtTokenService` se encargan únicamente de criptografía y tokens.
+
+2. **O — Open/Closed Principle (OCP)**:
+   - El sistema está abierto a la extensión y cerrado a la modificación: agregar una nueva historia requiere crear un nuevo comando/consulta y su manejador, registrándolo en el bus sin alterar el código del bus ni de otros módulos.
+
+3. **L — Liskov Substitution Principle (LSP)**:
+   - Los componentes dependen de contratos claros (`IPasswordHasher`, `ITokenService`, `IUsuarioRepository`). Cualquier implementación (por ejemplo, fakes de prueba en memoria) puede sustituir a la implementación real sin alterar el comportamiento esperado.
+
+4. **I — Interface Segregation Principle (ISP)**:
+   - Se segregan los contratos de datos en lectura (`IUsuarioReadRepository`) y escritura (`IUsuarioWriteRepository`). Los manejadores de consultas solo reciben el repositorio de lectura, garantizando a nivel de tipos que una consulta no puede mutar datos.
+
+5. **D — Dependency Inversion Principle (DIP)**:
+   - Los módulos de alto nivel (manejadores de casos de uso) no dependen de detalles de infraestructura como Prisma, bcrypt o jsonwebtoken directamente. Dependen de interfaces abstractas (`src/core/interfaces/`) que son inyectadas a través del contenedor de dependencias (`src/container.ts`).
 
 ## 10. Cómo compartir nuestros avances
 
@@ -360,6 +393,7 @@ Dejamos fuera `.env`, contraseñas, datos locales, fotos cargadas, `node_modules
 | `npm run db:migrate:dev -- --name descripcion` | Crear y aplicar una migración durante el desarrollo. |
 | `npm run db:studio` | Abrir el visor de tablas en el puerto 5555. |
 | `npm run typecheck` | Revisar los tipos del código. |
+| `npm test` | Ejecutar las pruebas unitarias y de arquitectura CQRS. |
 
 ## 14. Si algo no funciona
 
