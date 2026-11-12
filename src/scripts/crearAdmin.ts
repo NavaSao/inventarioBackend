@@ -1,7 +1,7 @@
 import 'dotenv/config';
-import bcrypt from 'bcrypt';
-import { costoBcrypt, credencialesSchema } from '../auth/credenciales.js';
-import { prisma } from '../database/prisma.js';
+import { credencialesSchema } from '../auth/credenciales.js';
+import { CrearAdminCommand, type ResultadoCrearAdmin } from '../commands/usuarios/crearAdmin.command.js';
+import { obtenerContenedor } from '../container.js';
 
 async function crearAdmin(): Promise<void> {
   const entrada = credencialesSchema.safeParse({
@@ -15,17 +15,16 @@ async function crearAdmin(): Promise<void> {
   }
 
   const { correo, password } = entrada.data;
-  const passwordHash = await bcrypt.hash(password, costoBcrypt);
+  const { commandBus } = obtenerContenedor();
 
-  // Si vuelvo a correr el comando con el mismo correo, conservo la cuenta que ya existe.
-  const { count } = await prisma.usuario.createMany({
-    data: [{ nombre: 'Administrador de TI', correo, passwordHash }],
-    skipDuplicates: true,
-  });
+  const { creado } = await commandBus.ejecutar<ResultadoCrearAdmin>(
+    new CrearAdminCommand('Administrador de TI', correo, password)
+  );
 
-  console.log(count ? 'Cuenta administrativa creada.' : 'La cuenta ya existe.');
+  console.log(creado ? 'Cuenta administrativa creada.' : 'La cuenta ya existe.');
 }
 
+const { prisma } = obtenerContenedor();
 try {
   await crearAdmin();
 } catch {
