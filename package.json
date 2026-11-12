@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "admin:crear": "tsx src/scripts/crearAdmin.ts",
+    "test": "tsx --test src/**/*.test.ts",
     "typecheck": "tsc --noEmit",
     "db:up": "docker compose up -d --wait postgres",
     "db:down": "docker compose stop postgres",
