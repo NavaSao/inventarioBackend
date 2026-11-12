@@ -1,31 +1,14 @@
-import { prisma } from '../../database/prisma.js';
+import { ObtenerSesionQuery } from './obtenerSesion.query.js';
+import { ObtenerSesionHandler } from './obtenerSesion.handler.js';
+import type { DatosSesion } from './sesion.dto.js';
+import { obtenerContenedor } from '../../container.js';
 
-export interface DatosSesion {
-  idUsuario: string;
-  nombre: string;
-  correo: string;
-}
+export { ObtenerSesionQuery, ObtenerSesionHandler, type DatosSesion };
 
+/**
+ * Función facade para compatibilidad directa que ejecuta la consulta a través del QueryBus.
+ */
 export async function obtenerSesion(idUsuario: string, versionSesion: number): Promise<DatosSesion | null> {
-  const usuario = await prisma.usuario.findUnique({
-    where: { idUsuario },
-    select: {
-      idUsuario: true,
-      nombre: true,
-      correo: true,
-      activo: true,
-      versionSesion: true,
-    },
-  });
-
-  // Reviso que la cuenta exista, esté activa y que la versión de sesión coincida con el token.
-  if (!usuario || !usuario.activo || usuario.versionSesion !== versionSesion) {
-    return null;
-  }
-
-  return {
-    idUsuario: usuario.idUsuario,
-    nombre: usuario.nombre,
-    correo: usuario.correo,
-  };
+  const { queryBus } = obtenerContenedor();
+  return queryBus.consultar<DatosSesion | null>(new ObtenerSesionQuery(idUsuario, versionSesion));
 }
