@@ -1,7 +1,9 @@
 import 'dotenv/config';
-import { credencialesSchema } from '../auth/credenciales.js';
+import { credencialesSchema } from '../validators/authValidator.js';
 import { CrearAdminCommand, type ResultadoCrearAdmin } from '../commands/usuarios/crearAdmin.command.js';
-import { obtenerContenedor } from '../container.js';
+import { crearContenedor } from '../config/container.js';
+
+const { prisma, commandBus } = crearContenedor();
 
 async function crearAdmin(): Promise<void> {
   const entrada = credencialesSchema.safeParse({
@@ -15,8 +17,6 @@ async function crearAdmin(): Promise<void> {
   }
 
   const { correo, password } = entrada.data;
-  const { commandBus } = obtenerContenedor();
-
   const { creado } = await commandBus.ejecutar<ResultadoCrearAdmin>(
     new CrearAdminCommand('Administrador de TI', correo, password)
   );
@@ -24,7 +24,6 @@ async function crearAdmin(): Promise<void> {
   console.log(creado ? 'Cuenta administrativa creada.' : 'La cuenta ya existe.');
 }
 
-const { prisma } = obtenerContenedor();
 try {
   await crearAdmin();
 } catch {

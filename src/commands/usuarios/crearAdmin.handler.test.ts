@@ -2,8 +2,8 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { CrearAdminCommand } from './crearAdmin.command.js';
 import { CrearAdminHandler } from './crearAdmin.handler.js';
-import type { CrearUsuarioInput, IUsuarioWriteRepository } from '../../core/interfaces/usuarioRepository.interface.js';
-import type { IPasswordHasher } from '../../core/interfaces/passwordHasher.interface.js';
+import type { CrearUsuarioInput, IUsuarioWriteRepository } from '../../contracts/usuarioRepository.interface.js';
+import type { IPasswordHasher } from '../../contracts/passwordHasher.interface.js';
 
 class MockUsuarioWriteRepo implements IUsuarioWriteRepository {
   public datosCreados: CrearUsuarioInput[] = [];

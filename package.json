@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "admin:crear": "tsx src/scripts/crearAdmin.ts",
-    "test": "tsx --test src/**/*.test.ts",
+    "test": "node --import tsx --test \"src/**/*.test.ts\"",
     "typecheck": "tsc --noEmit",
     "db:up": "docker compose up -d --wait postgres",
     "db:down": "docker compose stop postgres",
@@ -18,7 +18,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
-    "db:check": "tsx src/comprobarConexion.ts",
+    "db:check": "tsx src/scripts/comprobarConexion.ts",
     "db:studio": "prisma studio --port 5555 --browser none"
   },
   "dependencies": {

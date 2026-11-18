@@ -1,5 +1,4 @@
-export * from './auth/iniciarSesion.command.js';
-export * from './auth/iniciarSesion.handler.js';
-export * from './auth/iniciarSesion.js';
+export * from './auth/LoginCommand.js';
+export * from './auth/LoginHandler.js';
 export * from './usuarios/crearAdmin.command.js';
 export * from './usuarios/crearAdmin.handler.js';

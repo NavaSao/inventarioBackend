@@ -1,5 +1,3 @@
-export interface DatosSesion {
-  readonly idUsuario: string;
-  readonly nombre: string;
-  readonly correo: string;
-}
+import type { User } from '../../models/User.js';
+
+export type DatosSesion = Pick<User, 'idUsuario' | 'nombre' | 'correo'>;

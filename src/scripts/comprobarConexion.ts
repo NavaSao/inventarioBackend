@@ -1,4 +1,4 @@
-import { prisma } from './database/prisma.js';
+import { prisma } from '../config/database.js';
 
 try {
   // Consultar las siete tablas comprueba la conexión y que la migración se aplicó.

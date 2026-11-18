@@ -1,8 +1,8 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { ObtenerSesionQuery } from './obtenerSesion.query.js';
-import { ObtenerSesionHandler } from './obtenerSesion.handler.js';
-import type { IUsuarioReadRepository, UsuarioSesionDto } from '../../core/interfaces/usuarioRepository.interface.js';
+import { ObtenerSesionQuery } from './GetSessionQuery.js';
+import { ObtenerSesionHandler } from './GetSessionHandler.js';
+import type { IUsuarioReadRepository, UsuarioSesionDto } from '../../contracts/usuarioRepository.interface.js';
 
 class MockUsuarioSesionReadRepo implements IUsuarioReadRepository {
   constructor(private readonly usuario: UsuarioSesionDto | null) {}
@@ -14,9 +14,6 @@ class MockUsuarioSesionReadRepo implements IUsuarioReadRepository {
     return null;
   }
 
-  async buscarPorCorreo(): Promise<any> {
-    return null;
-  }
 }
 
 describe('ObtenerSesionHandler', () => {

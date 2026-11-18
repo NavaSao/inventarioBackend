@@ -1,6 +1,6 @@
 import type { ICommandHandler } from '../../core/cqrs/command.interface.js';
-import type { IPasswordHasher } from '../../core/interfaces/passwordHasher.interface.js';
-import type { IUsuarioWriteRepository } from '../../core/interfaces/usuarioRepository.interface.js';
+import type { IPasswordHasher } from '../../contracts/passwordHasher.interface.js';
+import type { IUsuarioWriteRepository } from '../../contracts/usuarioRepository.interface.js';
 import { CrearAdminCommand, type ResultadoCrearAdmin } from './crearAdmin.command.js';
 
 export class CrearAdminHandler implements ICommandHandler<CrearAdminCommand, ResultadoCrearAdmin> {

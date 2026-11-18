@@ -1,12 +1,12 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { IniciarSesionCommand } from './iniciarSesion.command.js';
-import { IniciarSesionHandler } from './iniciarSesion.handler.js';
-import type { IUsuarioReadRepository, UsuarioAuthDto } from '../../core/interfaces/usuarioRepository.interface.js';
-import type { IPasswordHasher } from '../../core/interfaces/passwordHasher.interface.js';
-import type { ITokenService, TokenPayload } from '../../core/interfaces/tokenService.interface.js';
+import { IniciarSesionCommand } from './LoginCommand.js';
+import { IniciarSesionHandler } from './LoginHandler.js';
+import type { IUsuarioLoginRepository, UsuarioAuthDto } from '../../contracts/usuarioRepository.interface.js';
+import type { IPasswordHasher } from '../../contracts/passwordHasher.interface.js';
+import type { ITokenService, TokenPayload } from '../../contracts/tokenService.interface.js';
 
-class MockUsuarioReadRepo implements IUsuarioReadRepository {
+class MockUsuarioLoginRepo implements IUsuarioLoginRepository {
   constructor(private readonly usuario: UsuarioAuthDto | null) {}
 
   async buscarPorCorreo(correo: string): Promise<UsuarioAuthDto | null> {
@@ -16,9 +16,6 @@ class MockUsuarioReadRepo implements IUsuarioReadRepository {
     return null;
   }
 
-  async buscarPorId(): Promise<any> {
-    return null;
-  }
 }
 
 class MockPasswordHasher implements IPasswordHasher {
@@ -28,7 +25,7 @@ class MockPasswordHasher implements IPasswordHasher {
     return `hash-${password}`;
   }
 
-  async compare(_password: string, _hash: string): Promise<boolean> {
+  async compare(_password: string, _hash: string | null): Promise<boolean> {
     return this.coincide;
   }
 }
@@ -55,7 +52,7 @@ describe('IniciarSesionHandler', () => {
 
   it('inicia sesión exitosamente cuando las credenciales son correctas y la cuenta está activa', async () => {
     const handler = new IniciarSesionHandler(
-      new MockUsuarioReadRepo(usuarioActivo),
+      new MockUsuarioLoginRepo(usuarioActivo),
       new MockPasswordHasher(true),
       new MockTokenService()
     );
@@ -70,7 +67,7 @@ describe('IniciarSesionHandler', () => {
 
   it('retorna null cuando el correo no existe en el sistema', async () => {
     const handler = new IniciarSesionHandler(
-      new MockUsuarioReadRepo(null),
+      new MockUsuarioLoginRepo(null),
       new MockPasswordHasher(false),
       new MockTokenService()
     );
@@ -84,7 +81,7 @@ describe('IniciarSesionHandler', () => {
 
   it('retorna null cuando la contraseña es incorrecta', async () => {
     const handler = new IniciarSesionHandler(
-      new MockUsuarioReadRepo(usuarioActivo),
+      new MockUsuarioLoginRepo(usuarioActivo),
       new MockPasswordHasher(false),
       new MockTokenService()
     );
@@ -103,7 +100,7 @@ describe('IniciarSesionHandler', () => {
     };
 
     const handler = new IniciarSesionHandler(
-      new MockUsuarioReadRepo(usuarioInactivo),
+      new MockUsuarioLoginRepo(usuarioInactivo),
       new MockPasswordHasher(true),
       new MockTokenService()
     );

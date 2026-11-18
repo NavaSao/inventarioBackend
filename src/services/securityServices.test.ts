@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { BcryptPasswordHasher } from './bcryptPasswordHasher.js';
-import { JwtTokenService } from './jwtTokenService.js';
+import { BcryptPasswordHasher } from './AuthService.js';
+import { JwtTokenService } from './TokenService.js';
 
 describe('BcryptPasswordHasher', () => {
   it('hashea contraseñas y verifica correctamente', async () => {

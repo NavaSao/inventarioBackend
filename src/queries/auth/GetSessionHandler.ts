@@ -1,6 +1,6 @@
 import type { IQueryHandler } from '../../core/cqrs/query.interface.js';
-import type { IUsuarioReadRepository } from '../../core/interfaces/usuarioRepository.interface.js';
-import { ObtenerSesionQuery } from './obtenerSesion.query.js';
+import type { IUsuarioReadRepository } from '../../contracts/usuarioRepository.interface.js';
+import { ObtenerSesionQuery } from './GetSessionQuery.js';
 import type { DatosSesion } from './sesion.dto.js';
 
 export class ObtenerSesionHandler implements IQueryHandler<ObtenerSesionQuery, DatosSesion | null> {

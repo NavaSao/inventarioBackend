@@ -56,8 +56,8 @@ Después abrimos la carpeta `inventarioBackend` en VS Code. Todos los comandos d
 Si ya tienen el repositorio, no hace falta clonarlo otra vez. Primero guarden sus cambios en su rama de trabajo y después actualicen:
 
 ```bash
-git switch main
-git pull --ff-only origin main
+git switch sprint-2
+git pull --ff-only origin sprint-2
 ```
 
 ## 4. Crear nuestro archivo .env
@@ -116,7 +116,7 @@ Al terminar `db:setup` debemos ver **Conexión correcta con PostgreSQL.** y una 
 
 Podemos volver a ejecutar `db:setup` para actualizar el entorno: aplica las migraciones pendientes y conserva los registros existentes. Los datos permanecen en el volumen de Docker aunque detengamos PostgreSQL.
 
-### Probar el login del sprint 1
+### Probar el login
 
 En su `.env`, pongan un correo en `ADMIN_CORREO`, una contraseña de prueba en `ADMIN_PASSWORD` (de 12 caracteres como mínimo y hasta 72 bytes) y una clave aleatoria propia en `JWT_SECRET`. Pueden generar la clave con este comando y copiar el resultado a su `.env`:
 
@@ -139,17 +139,17 @@ Envíen `POST http://127.0.0.1:3000/api/auth/login` con `Content-Type: applicati
 { "correo": "admin@assetops.test", "password": "su-contraseña-local" }
 ```
 
-- `200` devuelve `{ "token": "..." }`.
+- `200` devuelve `{ "status": 200, "message": "Inicio de sesión correcto", "data": { "token": "..." } }`.
 - `400` indica que hay que corregir los datos.
-- `401` devuelve `{ "mensaje": "Acceso inválido" }` para una clave incorrecta, una cuenta inactiva o un correo que no existe.
+- `401` devuelve `{ "status": 401, "message": "Acceso inválido", "data": null }` para una clave incorrecta, una cuenta inactiva o un correo que no existe.
 
-Para la validación de sesión, el JWT lleva el ID de la cuenta en `sub`, `versionSesion` y un vencimiento de una hora. La firma usa `HS256` con la clave local del backend. Durante el sprint, abrimos los Pull Requests de cada tarea hacia `sprint-1`.
+Para la validación de sesión, el JWT lleva el ID de la cuenta en `sub`, `versionSesion` y un vencimiento de una hora. La firma usa `HS256` con la clave local del backend.
 
-### Probar la validación de sesión del sprint 1
+### Probar la validación de sesión
 
-Para consultar si la sesión guardada sigue activa, envíen `GET http://127.0.0.1:3000/api/auth/session` con la cabecera `Authorization: Bearer <token>`:
+Para consultar si la sesión guardada sigue activa, envíen `GET http://127.0.0.1:3000/api/auth/sesion` con la cabecera `Authorization: Bearer <token>`. La app también puede usar el alias `/api/auth/session`.
 
-- `200` devuelve los datos de la cuenta: `{ "idUsuario": "...", "nombre": "...", "correo": "..." }`.
+- `200` devuelve `{ "status": 200, "message": "Sesión activa", "data": { "idUsuario": "...", "nombre": "...", "correo": "..." } }`.
 - `401` devuelve error si el token expiró, la firma no coincide, la cuenta está inactiva o la versión de sesión cambió.
 
 
@@ -185,16 +185,22 @@ prisma/
   schema.prisma              Modelo de las siete tablas y sus relaciones
   migrations/                SQL para crear y actualizar la estructura
 src/
-  core/
-    cqrs/                    Interfaces y buses en memoria para comandos y consultas
-    interfaces/              Contratos de repositorios y servicios (DIP e ISP)
-  commands/                  Operaciones que cambian información (Comandos y Handlers)
-  queries/                   Operaciones de lectura y DTOs (Consultas y Handlers)
-  infrastructure/            Implementaciones técnicas (Prisma, Bcrypt, JWT)
-  auth/                      Controlador, rutas y validaciones del módulo de autenticación
-  database/prisma.ts         Cliente compartido de conexión
-  container.ts               Contenedor de inyección de dependencias (Composition Root)
-  comprobarConexion.ts       Comprueba la conexión consultando las siete tablas
+  server.ts                  Comprueba PostgreSQL e inicia el servidor
+  app.ts                     Configura Express, las rutas y el manejo de errores
+  routes/                    Une cada ruta con sus validadores y controladores
+  validators/                Valida entradas HTTP con Zod
+  middlewares/               Verificación del Bearer y manejo global de errores
+  controllers/               Traduce peticiones HTTP a comandos o consultas
+  commands/                  Operaciones de autenticación y escritura
+  queries/                   Operaciones de lectura y sus manejadores
+  core/cqrs/                 Interfaces y buses en memoria
+  contracts/                 Contratos de repositorios y servicios
+  repositories/              Acceso a PostgreSQL mediante Prisma
+  services/                  Bcrypt y JWT
+  config/                    Contenedor de dependencias y configuración de Prisma y JWT
+  models/ y enums/           Tipos de dominio y estados de activos
+  exceptions/ y utils/       Errores tipados y formato de respuesta
+  scripts/                   Alta del administrador y comprobación de PostgreSQL
 .env.example                 Plantilla de configuración local
 compose.yaml                 PostgreSQL en Docker y almacenamiento de sus datos
 prisma.config.ts             Configuración de las herramientas de Prisma
@@ -215,8 +221,8 @@ Estos son los archivos principales que conviene revisar en orden:
 | `prisma/schema.prisma` | Aquí vemos campos, llaves y relaciones. Si acordamos cambiar la estructura, editamos el modelo y creamos una nueva migración. |
 | `prisma/migrations/` | Compartimos estas instrucciones para que todos creemos la misma estructura. No editamos migraciones que ya se compartieron y aplicaron. |
 | `prisma.config.ts` | Indica dónde están el modelo y las migraciones, y obtiene `DATABASE_URL` para los comandos de Prisma. |
-| `src/database/prisma.ts` | Lee la conexión de `.env` y exporta `prisma`. Lo reutilizaremos desde los comandos y consultas. |
-| `src/comprobarConexion.ts` | Cuenta los registros de las siete tablas, muestra los resultados y cierra la conexión al terminar. No modifica registros. |
+| `src/config/database.ts` | Lee la conexión de `.env` y exporta el cliente Prisma para los repositorios y scripts. |
+| `src/scripts/comprobarConexion.ts` | Cuenta los registros de las siete tablas, muestra los resultados y cierra la conexión al terminar. No modifica registros. |
 | `compose.yaml` | Define la versión de PostgreSQL, el puerto, la configuración y el volumen donde se guardan los datos. |
 | `package.json` | Reúne los comandos que usamos en esta guía y las dependencias que necesita el proyecto. |
 
@@ -225,9 +231,9 @@ El recorrido de nuestra comprobación es:
 ```text
 npm run db:check
         ↓
-src/comprobarConexion.ts
+src/scripts/comprobarConexion.ts
         ↓
-src/database/prisma.ts
+src/config/database.ts
         ↓
 Cliente Prisma y adaptador PostgreSQL
         ↓
@@ -276,12 +282,16 @@ Separamos las intenciones de escritura de las de lectura mediante objetos de com
 | Componente | Responsabilidad | Ejemplo |
 | --- | --- | --- |
 | `src/core/cqrs/` | Define `ICommand`, `IQuery`, `ICommandHandler`, `IQueryHandler`, `ICommandBus` y `IQueryBus`. | `InMemoryCommandBus` y `InMemoryQueryBus`. |
-| `src/commands/` | Comandos (intención de mutar datos) y sus Command Handlers. | `IniciarSesionCommand`, `CrearAdminCommand`. |
+| `src/commands/` | Comandos y sus manejadores para operaciones como iniciar sesión o crear el administrador. | `IniciarSesionCommand`, `CrearAdminCommand`. |
 | `src/queries/` | Consultas (recuperación de datos sin efectos secundarios), DTOs y Query Handlers. | `ObtenerSesionQuery`, `DatosSesion`. |
-| `src/container.ts` | Ensambla las dependencias (Composition Root) y registra los manejadores en los buses. | Registro centralizado de buses. |
+| `src/config/container.ts` | Ensambla las dependencias (Composition Root) y registra los manejadores en los buses. | Registro centralizado de buses. |
+
+El middleware Bearer verifica el JWT y añade sus datos a `req.user`. El manejador de sesión comprueba además en PostgreSQL que el usuario exista, siga activo y conserve la misma versión de sesión. Para proteger futuras rutas, hay que aplicar ambas comprobaciones.
 
 El flujo de una petición a través de CQRS es:
 ```text
+Ruta y validador o middleware de autenticación
+       ↓
 Controlador Express
        ↓ (despacha Comando o Consulta)
 CommandBus / QueryBus
@@ -303,23 +313,23 @@ Repositorios / Servicios de Seguridad
    - El sistema está abierto a la extensión y cerrado a la modificación: agregar una nueva historia requiere crear un nuevo comando/consulta y su manejador, registrándolo en el bus sin alterar el código del bus ni de otros módulos.
 
 3. **L — Liskov Substitution Principle (LSP)**:
-   - Los componentes dependen de contratos claros (`IPasswordHasher`, `ITokenService`, `IUsuarioRepository`). Cualquier implementación (por ejemplo, fakes de prueba en memoria) puede sustituir a la implementación real sin alterar el comportamiento esperado.
+   - Los componentes dependen de contratos claros (`IPasswordHasher`, `ITokenService`, `IUsuarioReadRepository`). Cualquier implementación (por ejemplo, fakes de prueba en memoria) puede sustituir a la implementación real sin alterar el comportamiento esperado.
 
 4. **I — Interface Segregation Principle (ISP)**:
-   - Se segregan los contratos de datos en lectura (`IUsuarioReadRepository`) y escritura (`IUsuarioWriteRepository`). Los manejadores de consultas solo reciben el repositorio de lectura, garantizando a nivel de tipos que una consulta no puede mutar datos.
+   - Cada manejador recibe el contrato que usa. El login busca por correo, el alta escribe y la sesión consulta por ID mediante `UserReadModel`. La consulta lee el estado y la versión de sesión sin acceder al hash.
 
 5. **D — Dependency Inversion Principle (DIP)**:
-   - Los módulos de alto nivel (manejadores de casos de uso) no dependen de detalles de infraestructura como Prisma, bcrypt o jsonwebtoken directamente. Dependen de interfaces abstractas (`src/core/interfaces/`) que son inyectadas a través del contenedor de dependencias (`src/container.ts`).
+   - Los módulos de alto nivel (manejadores de casos de uso) no dependen de detalles de infraestructura como Prisma, bcrypt o jsonwebtoken directamente. Dependen de interfaces abstractas (`src/contracts/`) que son inyectadas a través del contenedor de dependencias (`src/config/container.ts`).
 
 ## 10. Cómo compartir nuestros avances
 
-`main` será el punto de partida común. Para mantenerlo funcionando, propongo que cada historia se trabaje en una rama propia y se integre mediante un Pull Request hacia `main`, después de revisarla.
+Para la semana 2 trabajamos desde `sprint-2`. Cada historia se trabaja en una rama propia y se integra por Pull Request hacia `sprint-2` después de la revisión.
 
 Antes de empezar una historia, guardamos nuestros cambios pendientes y actualizamos:
 
 ```bash
-git switch main
-git pull --ff-only origin main
+git switch sprint-2
+git pull --ff-only origin sprint-2
 npm ci
 npm run db:setup
 git switch -c feature/registro-empleados
@@ -346,7 +356,7 @@ git commit -m "Agrega registro de empleados"
 git push -u origin feature/registro-empleados
 ```
 
-En GitHub abrimos un Pull Request con `main` como destino y nuestra rama como origen. Describimos qué cambió y cómo lo comprobamos. Después de revisar e integrar el cambio, los demás actualizan `main` y vuelven a ejecutar `npm ci` y `npm run db:setup`.
+En GitHub abrimos un Pull Request con `sprint-2` como destino y nuestra rama como origen. Describimos qué cambió y cómo lo comprobamos. Después de revisar e integrar el cambio, los demás actualizan `sprint-2` y vuelven a ejecutar `npm ci` y `npm run db:setup`.
 
 ## 11. Qué hacemos cuando cambia la estructura
 
