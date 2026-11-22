@@ -18,6 +18,11 @@ export interface UserSessionDTO {
   correo: string;
 }
 
+export interface UserSessionState extends UserSessionDTO {
+  activo: boolean;
+  versionSesion: number;
+}
+
 /**
  * Repositorio de Escritura y Autenticación (CQRS - Comandos)
  */
@@ -30,7 +35,7 @@ export interface IUserRepository {
  * Modelo de Lectura Optimizado (CQRS - Consultas)
  */
 export interface IUserReadModel {
-  findSessionById(idUsuario: string, versionSesion: number): Promise<UserSessionDTO | null>;
+  findById(idUsuario: string): Promise<UserSessionState | null>;
 }
 
 /**
