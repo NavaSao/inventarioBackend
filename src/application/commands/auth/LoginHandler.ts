@@ -23,7 +23,7 @@ export class LoginHandler implements ILoginHandler {
     private readonly userRepository: IUserRepository,
     private readonly authService: IAuthService,
     private readonly tokenService: ITokenService,
-  ) {}
+  ) { }
 
   async handle(command: LoginCommand): Promise<LoginResult> {
     const usuario = await this.userRepository.findByEmail(command.email);

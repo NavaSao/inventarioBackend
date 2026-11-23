@@ -4,48 +4,71 @@
  */
 import { UserRepository } from '../repositories/UserRepository.js';
 import { UserReadModel } from '../repositories/UserReadModel.js';
+import { LicenciaRepository } from '../repositories/LicenciaRepository.js';
 import { AuthService } from '../services/AuthService.js';
 import { TokenService } from '../services/TokenService.js';
+import { NodemailerMailService } from '../services/NodemailerMailService.js';
+import { MailTemplateRenderer } from '../services/MailTemplateRenderer.js';
+import { mailConfig } from './mail.js';
 import { LoginCommandHandler } from '../../application/commands/auth/LoginCommandHandler.js';
 import { GlobalLogoutCommandHandler } from '../../application/commands/auth/GlobalLogoutCommandHandler.js';
 import { ValidateSessionQueryHandler } from '../../application/queries/auth/ValidateSessionQueryHandler.js';
+import { RegistrarLicenciaHandler } from '../../application/commands/licencias/RegistrarLicenciaHandler.js';
+import { ConsultarLicenciaHandler, ListarLicenciasHandler } from '../../application/queries/licencias/LicenciaHandlers.js';
+import { SendWelcomeEmailHandler } from '../../application/commands/notifications/SendWelcomeEmailHandler.js';
+import { SendAssignmentNoticeHandler } from '../../application/commands/notifications/SendAssignmentNoticeHandler.js';
 import { LoginController } from '../../presentation/controllers/LoginController.js';
 import { GlobalLogoutController } from '../../presentation/controllers/GlobalLogoutController.js';
 import { ValidateSessionController } from '../../presentation/controllers/ValidateSessionController.js';
-import { AuthGuard } from '../../presentation/middlewares/authGuard.js';
-import { LicenciaRepository } from '../repositories/LicenciaRepository.js';
-import { RegistrarLicenciaHandler } from '../../application/commands/licencias/RegistrarLicenciaHandler.js';
-import { ConsultarLicenciaHandler, ListarLicenciasHandler } from '../../application/queries/licencias/LicenciaHandlers.js';
 import {
   ConsultarLicenciaController,
   ListarLicenciasController,
   RegistrarLicenciaController,
 } from '../../presentation/controllers/LicenciaControllers.js';
+import { notificationControllerFactory } from '../../presentation/controllers/NotificationController.js';
+import { AuthGuard } from '../../presentation/middlewares/authGuard.js';
 import { crearGuardiaSesionActiva } from '../../presentation/middlewares/activeSession.js';
 
 // 1. Repositorios y ReadModels (Persistencia)
 export const userRepository = new UserRepository();
 export const userReadModel = new UserReadModel();
+export const licenciaRepository = new LicenciaRepository();
 
 // 2. Servicios de Infraestructura
 export const authService = new AuthService();
 export const tokenService = new TokenService();
+export const mailService = new NodemailerMailService(mailConfig);
+export const mailTemplateRenderer = new MailTemplateRenderer();
 
 // 3. Orquestadores CQRS (Command y Query Handlers)
 export const loginCommandHandler = new LoginCommandHandler(userRepository, authService, tokenService);
 export const globalLogoutCommandHandler = new GlobalLogoutCommandHandler(userRepository);
 export const validateSessionQueryHandler = new ValidateSessionQueryHandler(userReadModel);
 
+export const registrarLicenciaHandler = new RegistrarLicenciaHandler(licenciaRepository);
+export const listarLicenciasHandler = new ListarLicenciasHandler(licenciaRepository);
+export const consultarLicenciaHandler = new ConsultarLicenciaHandler(licenciaRepository);
+
+export const sendWelcomeEmailHandler = new SendWelcomeEmailHandler(
+  mailService,
+  mailTemplateRenderer,
+  { welcomeEnabledByDefault: mailConfig.welcomeEnabledByDefault },
+);
+export const sendAssignmentNoticeHandler = new SendAssignmentNoticeHandler(
+  mailService,
+  mailTemplateRenderer,
+);
+
 // Aliases retrocompatibles para Casos de Uso
 export const loginHandler = loginCommandHandler;
 export const getSessionHandler = validateSessionQueryHandler;
 
-// 4. Guard / Middleware desacoplado
+// 4. Guards / Middlewares desacoplados
 export const authGuard = new AuthGuard(tokenService);
 export const authMiddleware = authGuard.handle;
 export const guardiaSesionActiva = crearGuardiaSesionActiva(validateSessionQueryHandler);
 
-// 5. Single Action Controllers
+// 5. Controladores HTTP (Single Action Controllers y Factory Controllers)
 export const loginController = new LoginController(loginCommandHandler);
 export const globalLogoutController = new GlobalLogoutController(globalLogoutCommandHandler);
 export const validateSessionController = new ValidateSessionController(validateSessionQueryHandler);
@@ -57,7 +80,11 @@ export const authController = {
   logoutGlobal: globalLogoutController.execute,
 };
 
-const licenciaRepository = new LicenciaRepository();
-export const registrarLicenciaController = new RegistrarLicenciaController(new RegistrarLicenciaHandler(licenciaRepository));
-export const listarLicenciasController = new ListarLicenciasController(new ListarLicenciasHandler(licenciaRepository));
-export const consultarLicenciaController = new ConsultarLicenciaController(new ConsultarLicenciaHandler(licenciaRepository));
+export const registrarLicenciaController = new RegistrarLicenciaController(registrarLicenciaHandler);
+export const listarLicenciasController = new ListarLicenciasController(listarLicenciasHandler);
+export const consultarLicenciaController = new ConsultarLicenciaController(consultarLicenciaHandler);
+
+export const notificationController = notificationControllerFactory({
+  sendWelcomeEmailHandler,
+  sendAssignmentNoticeHandler,
+});

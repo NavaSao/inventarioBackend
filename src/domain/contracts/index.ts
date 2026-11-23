@@ -70,3 +70,22 @@ export interface ITokenService {
   generateToken(idUsuario: string, versionSesion: number): string;
   verifyToken(token: string): { sub: string; versionSesion: number } | null;
 }
+
+export type {
+  MailMessage,
+  MailSendResult,
+  EmailDispatchStatus,
+  EmailDispatchResult,
+  WelcomeRecipientType,
+  WelcomeEmailData,
+  AssignmentType,
+  AssetAssignmentDetails,
+  LicenseAssignmentDetails,
+  AssignmentNoticeBase,
+  AssetAssignmentNoticeData,
+  LicenseAssignmentNoticeData,
+  AssignmentNoticeData,
+  RenderedEmailTemplate,
+  IMailService,
+  IMailTemplateRenderer,
+} from './mail.js';
