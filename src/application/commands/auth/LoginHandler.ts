@@ -11,10 +11,14 @@ export interface LoginResult {
   };
 }
 
+export interface ILoginHandler {
+  handle(command: LoginCommand): Promise<LoginResult>;
+}
+
 /**
  * Orquestador de autenticación y emisión de JWT (CQRS - Command Handler).
  */
-export class LoginHandler {
+export class LoginHandler implements ILoginHandler {
   constructor(
     private readonly userRepository: IUserRepository,
     private readonly authService: IAuthService,

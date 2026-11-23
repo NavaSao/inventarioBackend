@@ -1,5 +1,6 @@
 import express from 'express';
 import authRoutes from './presentation/routes/authRoutes.js';
+import licenciaRoutes from './presentation/routes/licenciaRoutes.js';
 import notificationRoutes from './presentation/routes/notificationRoutes.js';
 import { errorHandler } from './presentation/middlewares/errorHandler.js';
 
@@ -9,7 +10,7 @@ const app = express();
 app.use(express.json({ limit: '4kb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Ruta de comprobación de salud (Health Check) 
+// Ruta de comprobación de salud (Health Check)
 app.get('/health', (_req, res) => {
   res.status(200).json({
     status: 'OK',
@@ -21,6 +22,7 @@ app.get('/health', (_req, res) => {
 
 // Montaje de rutas modulares (Arquitectura CQRS)
 app.use('/api/auth', authRoutes);
+app.use('/api/licencias', licenciaRoutes);
 app.use('/api/notificaciones', notificationRoutes);
 
 // Manejador centralizado de errores

@@ -1,5 +1,9 @@
 import { Router } from 'express';
-import { authMiddleware, notificationController } from '../../infrastructure/config/container.js';
+import {
+  authGuard,
+  guardiaSesionActiva,
+  notificationController,
+} from '../../infrastructure/config/container.js';
 import {
   validateAssignmentNotice,
   validateTestEmail,
@@ -8,8 +12,8 @@ import {
 
 const router = Router();
 
-// Todas las rutas de notificaciones requieren sesión autenticada de administrador de TI
-router.use(authMiddleware);
+// Todas las rutas de notificaciones requieren JWT válido y sesión activa no revocada (HU02)
+router.use(authGuard.handle, guardiaSesionActiva);
 
 // Command (HU03): Envío de correo de bienvenida opcional
 router.post('/bienvenida', validateWelcomeEmail, notificationController.enviarBienvenida);

@@ -1,13 +1,14 @@
-import type { IUserReadModel, UserSessionDTO } from '../../domain/contracts/index.js';
+import type { ISessionQueryRepository, IUserReadModel, UserSessionDTO, UserSessionState } from '../../domain/contracts/index.js';
 import { prisma } from '../config/database.js';
 
 /**
  * UserReadModel: Modelo de lectura optimizado para consultas directas (CQRS - Queries).
+ * Implementa ISessionQueryRepository e IUserReadModel (SOLID ISP).
  * No expone hashes de contraseña ni información sensible.
  */
-export class UserReadModel implements IUserReadModel {
-  async findSessionById(idUsuario: string, versionSesion: number): Promise<UserSessionDTO | null> {
-    const usuario = await prisma.usuario.findUnique({
+export class UserReadModel implements ISessionQueryRepository, IUserReadModel {
+  async findById(idUsuario: string): Promise<UserSessionState | null> {
+    return prisma.usuario.findUnique({
       where: { idUsuario },
       select: {
         idUsuario: true,
@@ -17,8 +18,12 @@ export class UserReadModel implements IUserReadModel {
         versionSesion: true,
       },
     });
+  }
 
-    // Validar las 3 reglas de negocio de sesión activa:
+  async findSessionById(idUsuario: string, versionSesion: number): Promise<UserSessionDTO | null> {
+    const usuario = await this.findById(idUsuario);
+
+    // Validar las reglas de negocio de sesión activa:
     if (!usuario || !usuario.activo || usuario.versionSesion !== versionSesion) {
       return null;
     }

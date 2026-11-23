@@ -10,6 +10,8 @@ export const loginSchema = z.object({
     .refine((v) => Buffer.byteLength(v, 'utf8') <= 72, 'La contraseña no puede exceder 72 bytes'),
 });
 
+export type LoginBody = z.infer<typeof loginSchema>;
+
 export function validateLogin(req: Request, _res: Response, next: NextFunction): void {
   const result = loginSchema.safeParse(req.body);
   if (!result.success) {
