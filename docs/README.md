@@ -14,6 +14,7 @@ Este backend implementa el patrón **CQRS (Command Query Responsibility Segregat
 | `docs/solid/` | Análisis detallado de los principios SOLID aplicados al código de cada módulo. | • [Teoría SOLID](./solid/solid-explicacion.md)<br>• [SOLID en Autenticación](./solid/solid-auth.md) |
 | `docs/flujos-http/` | Trazas del ciclo de vida de cada petición HTTP (Request -> Controller -> Handler -> DB). | • [Ciclo de Login](./flujos-http/flujo-auth-login.md)<br>• [Ciclo de Consulta de Sesión](./flujos-http/flujo-auth-sesion.md) |
 | `docs/conexion-apis/` | Guías técnicas y contratos JSON para el equipo Frontend (Mobile). | • [Endpoint POST /login](./conexion-apis/auth-login.md)<br>• [Endpoint GET /sesion](./conexion-apis/auth-sesion.md) |
+| `docs/correo-smtp-hu03-hu06.md` | Documentación completa del servicio SMTP, HU03, HU06, pruebas y evidencias con capturas. | [Leer Correo SMTP (HU03 y HU06)](./correo-smtp-hu03-hu06.md) |
 
 ---
 
@@ -66,3 +67,4 @@ Este backend implementa el patrón **CQRS (Command Query Responsibility Segregat
 - **Base de Datos:** PostgreSQL 16 ejecutándose en contenedor aislado Docker Compose.
 - **Seguridad:** Cifrado de contraseñas con `bcrypt` (costo 12) con protección anti-timing attacks; Tokens de sesión con `jsonwebtoken` (HS256, mínimo 32 bytes de secreto).
 - **Validación:** Esquemas tipados con `zod`.
+- **Correo y Notificaciones:** Envío SMTP desacoplado con `nodemailer` (compatible con Ethereal Email en pruebas y Gmail/SMTP real en producción).

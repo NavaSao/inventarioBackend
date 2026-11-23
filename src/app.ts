@@ -1,5 +1,6 @@
 import express from 'express';
 import authRoutes from './presentation/routes/authRoutes.js';
+import notificationRoutes from './presentation/routes/notificationRoutes.js';
 import { errorHandler } from './presentation/middlewares/errorHandler.js';
 
 const app = express();
@@ -20,6 +21,7 @@ app.get('/health', (_req, res) => {
 
 // Montaje de rutas modulares (Arquitectura CQRS)
 app.use('/api/auth', authRoutes);
+app.use('/api/notificaciones', notificationRoutes);
 
 // Manejador centralizado de errores
 app.use(errorHandler);
