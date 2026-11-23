@@ -1,15 +1,18 @@
 /**
  * Composition Root (Contenedor de Inyección de Dependencias).
- * Ensambla todo el grafo de dependencias de la aplicación en un único punto central.
+ * Ensambla todo el grafo de dependencias de la aplicación en un único punto central (DIP).
  */
 import { UserRepository } from '../repositories/UserRepository.js';
 import { UserReadModel } from '../repositories/UserReadModel.js';
 import { AuthService } from '../services/AuthService.js';
 import { TokenService } from '../services/TokenService.js';
-import { LoginHandler } from '../../application/commands/auth/LoginHandler.js';
-import { GetSessionHandler } from '../../application/queries/auth/GetSessionHandler.js';
-import { authControllerFactory } from '../../presentation/controllers/AuthController.js';
-import { createAuthMiddleware } from '../../presentation/middlewares/auth.js';
+import { LoginCommandHandler } from '../../application/commands/auth/LoginCommandHandler.js';
+import { GlobalLogoutCommandHandler } from '../../application/commands/auth/GlobalLogoutCommandHandler.js';
+import { ValidateSessionQueryHandler } from '../../application/queries/auth/ValidateSessionQueryHandler.js';
+import { LoginController } from '../../presentation/controllers/LoginController.js';
+import { GlobalLogoutController } from '../../presentation/controllers/GlobalLogoutController.js';
+import { ValidateSessionController } from '../../presentation/controllers/ValidateSessionController.js';
+import { AuthGuard } from '../../presentation/middlewares/authGuard.js';
 
 // 1. Repositorios y ReadModels (Persistencia)
 export const userRepository = new UserRepository();
@@ -20,14 +23,26 @@ export const authService = new AuthService();
 export const tokenService = new TokenService();
 
 // 3. Orquestadores CQRS (Command y Query Handlers)
-export const loginHandler = new LoginHandler(userRepository, authService, tokenService);
-export const getSessionHandler = new GetSessionHandler(userReadModel);
+export const loginCommandHandler = new LoginCommandHandler(userRepository, authService, tokenService);
+export const globalLogoutCommandHandler = new GlobalLogoutCommandHandler(userRepository);
+export const validateSessionQueryHandler = new ValidateSessionQueryHandler(userReadModel);
 
-// 4. Middlewares de Soporte
-export const authMiddleware = createAuthMiddleware(tokenService);
+// Aliases retrocompatibles para Casos de Uso
+export const loginHandler = loginCommandHandler;
+export const getSessionHandler = validateSessionQueryHandler;
 
-// 5. Controladores HTTP
-export const authController = authControllerFactory({
-  loginHandler,
-  getSessionHandler,
-});
+// 4. Guard / Middleware desacoplado
+export const authGuard = new AuthGuard(tokenService);
+export const authMiddleware = authGuard.handle;
+
+// 5. Single Action Controllers
+export const loginController = new LoginController(loginCommandHandler);
+export const globalLogoutController = new GlobalLogoutController(globalLogoutCommandHandler);
+export const validateSessionController = new ValidateSessionController(validateSessionQueryHandler);
+
+// Objeto agrupador retrocompatible si fuera necesario
+export const authController = {
+  login: loginController.execute,
+  consultarSesion: validateSessionController.execute,
+  logoutGlobal: globalLogoutController.execute,
+};

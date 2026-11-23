@@ -1,6 +1,6 @@
 /**
- * Contratos e Interfaces del Sistema (Principio D e I de SOLID).
- * Permiten desacoplar los Casos de Uso (Handlers) de la infraestructura (Prisma, JWT, Bcrypt).
+ * Contratos e Interfaces del Sistema (Principios SOLID - ISP y DIP).
+ * Permiten desacoplar los Casos de Uso (Handlers) de la infraestructura concreta.
  */
 
 export interface UserAuthEntity {
@@ -24,22 +24,39 @@ export interface UserSessionState extends UserSessionDTO {
 }
 
 /**
- * Repositorio de Escritura y Autenticación (CQRS - Comandos)
+ * Repositorio de Autenticación de Usuario (SOLID ISP - Búsqueda de credenciales)
  */
-export interface IUserRepository {
+export interface IUserAuthRepository {
   findByEmail(correo: string): Promise<UserAuthEntity | null>;
   findById(idUsuario: string): Promise<UserAuthEntity | null>;
 }
 
+// Alias retrocompatible
+export type IUserRepository = IUserAuthRepository;
+
 /**
- * Modelo de Lectura Optimizado (CQRS - Consultas)
+ * Repositorio para Invalidación de Sesiones Globales (SOLID ISP - HU02)
  */
-export interface IUserReadModel {
-  findById(idUsuario: string): Promise<UserSessionState | null>;
+export interface ISessionInvalidationRepository {
+  incrementSessionVersion(idUsuario: string): Promise<void>;
 }
 
 /**
- * Servicio de Seguridad y Cifrado
+ * Modelo de Lectura Optimizado para Consultas de Sesión (CQRS - Queries / SOLID ISP)
+ */
+export interface ISessionQueryRepository {
+  findSessionById(idUsuario: string, versionSesion: number): Promise<UserSessionDTO | null>;
+  findById?(idUsuario: string): Promise<UserSessionState | null>;
+}
+
+// Interfaz retrocompatible para ReadModel
+export interface IUserReadModel {
+  findById(idUsuario: string): Promise<UserSessionState | null>;
+  findSessionById(idUsuario: string, versionSesion: number): Promise<UserSessionDTO | null>;
+}
+
+/**
+ * Servicio de Seguridad y Cifrado de Contraseñas (SOLID DIP)
  */
 export interface IAuthService {
   verifyPassword(password: string, passwordHash: string): Promise<boolean>;
@@ -47,7 +64,7 @@ export interface IAuthService {
 }
 
 /**
- * Servicio de Generación y Validación de Tokens JWT
+ * Servicio de Generación y Validación de Tokens JWT (SOLID DIP)
  */
 export interface ITokenService {
   generateToken(idUsuario: string, versionSesion: number): string;
