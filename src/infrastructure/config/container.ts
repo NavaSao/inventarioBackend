@@ -13,6 +13,15 @@ import { LoginController } from '../../presentation/controllers/LoginController.
 import { GlobalLogoutController } from '../../presentation/controllers/GlobalLogoutController.js';
 import { ValidateSessionController } from '../../presentation/controllers/ValidateSessionController.js';
 import { AuthGuard } from '../../presentation/middlewares/authGuard.js';
+import { LicenciaRepository } from '../repositories/LicenciaRepository.js';
+import { RegistrarLicenciaHandler } from '../../application/commands/licencias/RegistrarLicenciaHandler.js';
+import { ConsultarLicenciaHandler, ListarLicenciasHandler } from '../../application/queries/licencias/LicenciaHandlers.js';
+import {
+  ConsultarLicenciaController,
+  ListarLicenciasController,
+  RegistrarLicenciaController,
+} from '../../presentation/controllers/LicenciaControllers.js';
+import { crearGuardiaSesionActiva } from '../../presentation/middlewares/activeSession.js';
 
 // 1. Repositorios y ReadModels (Persistencia)
 export const userRepository = new UserRepository();
@@ -34,6 +43,7 @@ export const getSessionHandler = validateSessionQueryHandler;
 // 4. Guard / Middleware desacoplado
 export const authGuard = new AuthGuard(tokenService);
 export const authMiddleware = authGuard.handle;
+export const guardiaSesionActiva = crearGuardiaSesionActiva(validateSessionQueryHandler);
 
 // 5. Single Action Controllers
 export const loginController = new LoginController(loginCommandHandler);
@@ -46,3 +56,8 @@ export const authController = {
   consultarSesion: validateSessionController.execute,
   logoutGlobal: globalLogoutController.execute,
 };
+
+const licenciaRepository = new LicenciaRepository();
+export const registrarLicenciaController = new RegistrarLicenciaController(new RegistrarLicenciaHandler(licenciaRepository));
+export const listarLicenciasController = new ListarLicenciasController(new ListarLicenciasHandler(licenciaRepository));
+export const consultarLicenciaController = new ConsultarLicenciaController(new ConsultarLicenciaHandler(licenciaRepository));

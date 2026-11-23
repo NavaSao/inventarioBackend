@@ -42,6 +42,7 @@ model Empleado {
   nombre         String
   correo         String   @unique
   departamento   String?
+  cargo          String?
   activo         Boolean  @default(true)
   creadoEn       DateTime @default(now()) @db.Timestamptz(3)
   actualizadoEn  DateTime @default(now()) @updatedAt @db.Timestamptz(3)
@@ -103,14 +104,17 @@ model AsignacionActivo {
 
 model Licencia {
   idLicencia         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  codigoLicencia     String   @unique
   software           String
+  plan               String?
+  periodicidad       String?
   proveedor          String?
   referenciaContrato String?
   inicioVigencia     DateTime @db.Date
   finVigencia        DateTime @db.Date
   cuposContratados   Int
-  costo              Decimal  @db.Decimal(12, 2)
-  moneda             String
+  costo              Decimal? @db.Decimal(12, 2)
+  moneda             String?
   creadoEn           DateTime @default(now()) @db.Timestamptz(3)
   actualizadoEn      DateTime @default(now()) @updatedAt @db.Timestamptz(3)
 
