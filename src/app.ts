@@ -2,6 +2,7 @@ import express from 'express';
 import authRoutes from './presentation/routes/authRoutes.js';
 import licenciaRoutes from './presentation/routes/licenciaRoutes.js';
 import notificationRoutes from './presentation/routes/notificationRoutes.js';
+import empleadoRoutes from './presentation/routes/empleadoRoutes.js';
 import { errorHandler } from './presentation/middlewares/errorHandler.js';
 
 const app = express();
@@ -24,6 +25,7 @@ app.get('/health', (_req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/licencias', licenciaRoutes);
 app.use('/api/notificaciones', notificationRoutes);
+app.use('/api/empleados', empleadoRoutes);
 
 // Manejador centralizado de errores
 app.use(errorHandler);

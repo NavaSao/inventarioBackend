@@ -5,6 +5,7 @@
 import { UserRepository } from '../repositories/UserRepository.js';
 import { UserReadModel } from '../repositories/UserReadModel.js';
 import { LicenciaRepository } from '../repositories/LicenciaRepository.js';
+import { EmpleadoRepository } from '../repositories/EmpleadoRepository.js';
 import { AuthService } from '../services/AuthService.js';
 import { TokenService } from '../services/TokenService.js';
 import { NodemailerMailService } from '../services/NodemailerMailService.js';
@@ -15,6 +16,10 @@ import { GlobalLogoutCommandHandler } from '../../application/commands/auth/Glob
 import { ValidateSessionQueryHandler } from '../../application/queries/auth/ValidateSessionQueryHandler.js';
 import { RegistrarLicenciaHandler } from '../../application/commands/licencias/RegistrarLicenciaHandler.js';
 import { ConsultarLicenciaHandler, ListarLicenciasHandler } from '../../application/queries/licencias/LicenciaHandlers.js';
+import { RegistrarEmpleadoHandler } from '../../application/commands/empleados/RegistrarEmpleadoHandler.js';
+import { EditarEmpleadoHandler } from '../../application/commands/empleados/EditarEmpleadoHandler.js';
+import { DesactivarEmpleadoHandler } from '../../application/commands/empleados/DesactivarEmpleadoHandler.js';
+import { ListarEmpleadosHandler } from '../../application/queries/empleados/ListarEmpleadosHandler.js';
 import { SendWelcomeEmailHandler } from '../../application/commands/notifications/SendWelcomeEmailHandler.js';
 import { SendAssignmentNoticeHandler } from '../../application/commands/notifications/SendAssignmentNoticeHandler.js';
 import { LoginController } from '../../presentation/controllers/LoginController.js';
@@ -25,6 +30,12 @@ import {
   ListarLicenciasController,
   RegistrarLicenciaController,
 } from '../../presentation/controllers/LicenciaControllers.js';
+import {
+  DesactivarEmpleadoController,
+  EditarEmpleadoController,
+  ListarEmpleadosController,
+  RegistrarEmpleadoController,
+} from '../../presentation/controllers/EmpleadoControllers.js';
 import { notificationControllerFactory } from '../../presentation/controllers/NotificationController.js';
 import { AuthGuard } from '../../presentation/middlewares/authGuard.js';
 import { crearGuardiaSesionActiva } from '../../presentation/middlewares/activeSession.js';
@@ -33,6 +44,7 @@ import { crearGuardiaSesionActiva } from '../../presentation/middlewares/activeS
 export const userRepository = new UserRepository();
 export const userReadModel = new UserReadModel();
 export const licenciaRepository = new LicenciaRepository();
+export const empleadoRepository = new EmpleadoRepository();
 
 // 2. Servicios de Infraestructura
 export const authService = new AuthService();
@@ -59,6 +71,14 @@ export const sendAssignmentNoticeHandler = new SendAssignmentNoticeHandler(
   mailTemplateRenderer,
 );
 
+export const registrarEmpleadoHandler = new RegistrarEmpleadoHandler(
+  empleadoRepository,
+  sendWelcomeEmailHandler,
+);
+export const editarEmpleadoHandler = new EditarEmpleadoHandler(empleadoRepository);
+export const desactivarEmpleadoHandler = new DesactivarEmpleadoHandler(empleadoRepository);
+export const listarEmpleadosHandler = new ListarEmpleadosHandler(empleadoRepository);
+
 // Aliases retrocompatibles para Casos de Uso
 export const loginHandler = loginCommandHandler;
 export const getSessionHandler = validateSessionQueryHandler;
@@ -83,6 +103,11 @@ export const authController = {
 export const registrarLicenciaController = new RegistrarLicenciaController(registrarLicenciaHandler);
 export const listarLicenciasController = new ListarLicenciasController(listarLicenciasHandler);
 export const consultarLicenciaController = new ConsultarLicenciaController(consultarLicenciaHandler);
+
+export const registrarEmpleadoController = new RegistrarEmpleadoController(registrarEmpleadoHandler);
+export const listarEmpleadosController = new ListarEmpleadosController(listarEmpleadosHandler);
+export const editarEmpleadoController = new EditarEmpleadoController(editarEmpleadoHandler);
+export const desactivarEmpleadoController = new DesactivarEmpleadoController(desactivarEmpleadoHandler);
 
 export const notificationController = notificationControllerFactory({
   sendWelcomeEmailHandler,
