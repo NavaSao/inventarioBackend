@@ -83,6 +83,7 @@ export class PrismaEmployeeSearchRepository implements IEmployeeSearchReadModel 
       where.OR = [
         { nombre: { contains: termino, mode: 'insensitive' } },
         { correo: { contains: termino, mode: 'insensitive' } },
+        { numeroEmpleado: { contains: termino, mode: 'insensitive' } },
       ];
     }
 

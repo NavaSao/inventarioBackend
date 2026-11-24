@@ -8,6 +8,7 @@ import { ResponseBuilder } from '../../infrastructure/utils/responseBuilder.js';
 import {
   assignLicenseBodySchema,
   assignLicenseParamSchema,
+  extractIdempotencyKey,
 } from '../validators/licenseAssignmentValidator.js';
 
 /**
@@ -25,16 +26,22 @@ export class AssignLicenseController {
 
       const params = assignLicenseParamSchema.parse(req.params);
       const body = assignLicenseBodySchema.parse(req.body);
+      const headerKey = extractIdempotencyKey(req.headers as Record<string, unknown> | undefined);
 
       const command = new AssignLicenseCommand({
         idLicencia: params.idLicencia,
         idEmpleado: body.idEmpleado,
         idUsuarioAsignacion: req.user.idUsuario,
+        claveAsignacion: body.claveAsignacion ?? headerKey,
         nota: body.nota,
       });
 
       const resultado = await this.handler.handle(command);
-      ResponseBuilder.success(res, resultado, 'Licencia asignada exitosamente', 201);
+      const status = resultado.reintentoRecuperado ? 200 : 201;
+      const message = resultado.reintentoRecuperado
+        ? 'Movimiento de asignación recuperado exitosamente'
+        : 'Licencia asignada exitosamente';
+      ResponseBuilder.success(res, resultado, message, status);
     } catch (error) {
       if (error instanceof ZodError) {
         next(new ValidationError('Datos de asignación inválidos', error.issues));

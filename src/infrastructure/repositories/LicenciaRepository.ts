@@ -2,9 +2,16 @@ import type {
   FiltroLicencias,
   ILicenciaReadModel,
   ILicenciaRepository,
+  ILicenseHistoryReadModel,
 } from '../../domain/contracts/licencias.js';
 import { BusinessError } from '../../domain/exceptions/BusinessError.js';
-import { DIAS_AVISO_VENCIMIENTO, type DatosLicencia, type Licencia } from '../../domain/models/Licencia.js';
+import {
+  DIAS_AVISO_VENCIMIENTO,
+  type CupoAsignado,
+  type DatosLicencia,
+  type Licencia,
+  type MovimientoLicenciaHistorial,
+} from '../../domain/models/Licencia.js';
 import { Prisma } from '../../generated/prisma/client.js';
 import { prisma } from '../config/database.js';
 
@@ -23,10 +30,57 @@ const camposLicencia = {
   moneda: true,
 } satisfies Prisma.LicenciaSelect;
 
+const camposMovimiento = {
+  idAsignacionLicencia: true,
+  asignadoEn: true,
+  liberadoEn: true,
+  claveAsignacion: true,
+  claveLiberacion: true,
+  nota: true,
+  empleado: {
+    select: {
+      idEmpleado: true,
+      numeroEmpleado: true,
+      nombre: true,
+      correo: true,
+      departamento: true,
+      activo: true,
+    },
+  },
+  asignadoPor: {
+    select: {
+      idUsuario: true,
+      nombre: true,
+    },
+  },
+  liberadoPor: {
+    select: {
+      idUsuario: true,
+      nombre: true,
+    },
+  },
+} satisfies Prisma.AsignacionLicenciaSelect;
+
 type FilaLicencia = Prisma.LicenciaGetPayload<{ select: typeof camposLicencia }>;
+type FilaMovimiento = Prisma.AsignacionLicenciaGetPayload<{ select: typeof camposMovimiento }>;
 
 function convertirLicencia({ costo, ...licencia }: FilaLicencia): Licencia {
   return { ...licencia, costo: costo?.toFixed(2) ?? null };
+}
+
+function mapearMovimiento(mov: FilaMovimiento): MovimientoLicenciaHistorial {
+  return {
+    idAsignacionLicencia: mov.idAsignacionLicencia,
+    estado: mov.liberadoEn === null ? 'ACTIVA' : 'LIBERADA',
+    asignadoEn: mov.asignadoEn,
+    liberadoEn: mov.liberadoEn,
+    claveAsignacion: mov.claveAsignacion,
+    claveLiberacion: mov.claveLiberacion,
+    nota: mov.nota,
+    empleado: mov.empleado,
+    asignadoPor: mov.asignadoPor,
+    liberadoPor: mov.liberadoPor,
+  };
 }
 
 function filtroDeVigencia(estado: FiltroLicencias['estado'], hoy: Date) {
@@ -41,7 +95,9 @@ function filtroDeVigencia(estado: FiltroLicencias['estado'], hoy: Date) {
   }
 }
 
-export class LicenciaRepository implements ILicenciaRepository, ILicenciaReadModel {
+export class LicenciaRepository
+  implements ILicenciaRepository, ILicenciaReadModel, ILicenseHistoryReadModel
+{
   async registrar(datos: DatosLicencia): Promise<Licencia> {
     try {
       const licencia = await prisma.licencia.create({ data: datos, select: camposLicencia });
@@ -88,19 +144,40 @@ export class LicenciaRepository implements ILicenciaRepository, ILicenciaReadMod
       select: {
         ...camposLicencia,
         asignaciones: {
-          where: { liberadoEn: null },
           orderBy: { asignadoEn: 'desc' },
-          select: {
-            idAsignacionLicencia: true,
-            asignadoEn: true,
-            empleado: { select: { idEmpleado: true, numeroEmpleado: true, nombre: true, departamento: true } },
-          },
+          select: camposMovimiento,
         },
       },
     });
     if (!licencia) return null;
 
     const { asignaciones, ...datos } = licencia;
-    return { ...convertirLicencia(datos), empleadosAsignados: asignaciones };
+    const historialAsignaciones = asignaciones.map(mapearMovimiento);
+    const empleadosAsignados: CupoAsignado[] = asignaciones
+      .filter((a) => a.liberadoEn === null)
+      .map((a) => ({
+        idAsignacionLicencia: a.idAsignacionLicencia,
+        asignadoEn: a.asignadoEn,
+        empleado: {
+          idEmpleado: a.empleado.idEmpleado,
+          numeroEmpleado: a.empleado.numeroEmpleado,
+          nombre: a.empleado.nombre,
+          departamento: a.empleado.departamento,
+        },
+      }));
+
+    return { ...convertirLicencia(datos), empleadosAsignados, historialAsignaciones };
+  }
+
+  async consultarHistorial(idLicencia: string) {
+    const detalle = await this.consultar(idLicencia);
+    if (!detalle) return null;
+
+    const { empleadosAsignados, historialAsignaciones, ...licencia } = detalle;
+    return {
+      licencia,
+      cuposAsignados: empleadosAsignados.length,
+      historial: historialAsignaciones,
+    };
   }
 }

@@ -3,6 +3,7 @@ import type {
   AssignLicenseInput,
   ILicenseAssignmentRepository,
 } from '../../domain/contracts/licenseAssignment.js';
+import { BusinessError } from '../../domain/exceptions/BusinessError.js';
 import type { Empleado } from '../../domain/models/Empleado.js';
 import type { Licencia } from '../../domain/models/Licencia.js';
 import { Prisma, type PrismaClient } from '../../generated/prisma/client.js';
@@ -16,18 +17,40 @@ export class PrismaLicenseAssignmentRepository implements ILicenseAssignmentRepo
     claveAsignacion: string,
     fechaAsignacion: Date,
   ): Promise<AsignacionLicenciaDetalle> {
-    const creada = await this.client.asignacionLicencia.create({
-      data: {
-        idLicencia: input.idLicencia,
-        idEmpleado: input.idEmpleado,
-        idUsuarioAsignacion: input.idUsuarioAsignacion,
-        claveAsignacion,
-        asignadoEn: fechaAsignacion,
-        nota: input.nota ?? null,
-      },
-    });
+    try {
+      const creada = await this.client.asignacionLicencia.create({
+        data: {
+          idLicencia: input.idLicencia,
+          idEmpleado: input.idEmpleado,
+          idUsuarioAsignacion: input.idUsuarioAsignacion,
+          claveAsignacion,
+          asignadoEn: fechaAsignacion,
+          nota: input.nota ?? null,
+        },
+      });
 
-    return creada;
+      return creada;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        const target = String(error.meta?.target ?? '');
+        if (target.includes('claveAsignacion')) {
+          const previa = await this.buscarAsignacionPorClave(claveAsignacion);
+          if (
+            previa &&
+            previa.idLicencia === input.idLicencia &&
+            previa.idEmpleado === input.idEmpleado
+          ) {
+            return previa;
+          }
+          throw new BusinessError('La clave de asignación ya fue utilizada en otro movimiento', 409);
+        }
+        throw new BusinessError(
+          'El empleado ya cuenta con un cupo asignado para esta licencia',
+          409,
+        );
+      }
+      throw error;
+    }
   }
 
   async liberarCupo(
@@ -37,8 +60,11 @@ export class PrismaLicenseAssignmentRepository implements ILicenseAssignmentRepo
     fechaLiberacion: Date,
     nota?: string | null,
   ): Promise<AsignacionLicenciaDetalle> {
-    const actualizada = await this.client.asignacionLicencia.update({
-      where: { idAsignacionLicencia },
+    const res = await this.client.asignacionLicencia.updateMany({
+      where: {
+        idAsignacionLicencia,
+        liberadoEn: null,
+      },
       data: {
         idUsuarioLiberacion,
         claveLiberacion,
@@ -47,7 +73,13 @@ export class PrismaLicenseAssignmentRepository implements ILicenseAssignmentRepo
       },
     });
 
-    return actualizada;
+    if (res.count === 0) {
+      throw new BusinessError('La asignación ya ha sido liberada previamente', 400);
+    }
+
+    return this.client.asignacionLicencia.findUniqueOrThrow({
+      where: { idAsignacionLicencia },
+    });
   }
 
   async buscarAsignacionAbierta(
@@ -69,6 +101,30 @@ export class PrismaLicenseAssignmentRepository implements ILicenseAssignmentRepo
     return this.client.asignacionLicencia.findUnique({
       where: { idAsignacionLicencia },
     });
+  }
+
+  async buscarAsignacionPorClave(
+    claveAsignacion: string,
+  ): Promise<AsignacionLicenciaDetalle | null> {
+    return this.client.asignacionLicencia.findUnique({
+      where: { claveAsignacion },
+    });
+  }
+
+  async buscarAsignacionPorClaveLiberacion(
+    claveLiberacion: string,
+  ): Promise<AsignacionLicenciaDetalle | null> {
+    return this.client.asignacionLicencia.findUnique({
+      where: { claveLiberacion },
+    });
+  }
+
+  async obtenerNombreUsuario(idUsuario: string): Promise<string | null> {
+    const usuario = await this.client.usuario.findUnique({
+      where: { idUsuario },
+      select: { nombre: true },
+    });
+    return usuario?.nombre ?? null;
   }
 
   async contarCuposOcupados(idLicencia: string): Promise<number> {

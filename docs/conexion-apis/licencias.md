@@ -1,13 +1,18 @@
-# API de Licencias (HU05)
+# API de Licencias (HU05, HU06 y HU07)
 
-Las tres rutas requieren `Authorization: Bearer <token>` con una sesión activa.
+Todas las rutas requieren `Authorization: Bearer <token>` con una sesión activa.
 El formato de respuesta es `{ status, message, data }` para éxitos y `{ status, message, errors? }` para errores.
 
 | Método y ruta | Qué hace |
 | --- | --- |
 | `POST /api/licencias` | Registra una contratación y devuelve el detalle básico con `201`. |
 | `GET /api/licencias` | Lista el catálogo con los cupos por licencia. Acepta `busqueda` por software o código y `estado` con `TODAS`, `VIGENTE`, `POR_VENCER` o `VENCIDA`. |
-| `GET /api/licencias/:idLicencia` | Consulta una licencia por su UUID y agrega `empleadosAsignados` con el ID de cada asignación abierta. |
+| `GET /api/licencias/:idLicencia` | Consulta una licencia por su UUID y agrega `empleadosAsignados` con el ID de cada asignación abierta y su historial. |
+| `GET /api/licencias/:idLicencia/asignar/previsualizacion?idEmpleado=...` | Previsualiza el Paso 2 de asignación: valida reglas de negocio y calcula `cuposLibresResultantes` y ocupación resultante. |
+| `POST /api/licencias/:idLicencia/asignar` | Asigna un cupo en transacción atómica (`201`), soporta `claveAsignacion` / cabecera `Idempotency-Key` para reintentos (`200`) y envía notificación SMTP. |
+| `POST /api/licencias/asignaciones/:idAsignacionLicencia/liberar` | Libera una asignación abierta conservando historial (`200`). Acepta `fechaLiberacion`, `claveLiberacion` / `Idempotency-Key` y `nota`. Permite liberar contratos vencidos sin habilitar nuevas asignaciones. |
+| `POST /api/licencias/:idLicencia/liberar` | Libera una asignación abierta por `idLicencia` + `idEmpleado` en el cuerpo. |
+| `GET /api/licencias/:idLicencia/historial` | Consulta el historial completo de movimientos (`ACTIVA` y `LIBERADA`) de la licencia. |
 
 ## Ejemplo de alta
 

@@ -21,7 +21,11 @@ export class ConsultarLicenciaHandler {
       throw new BusinessError('Licencia no encontrada', 404);
     }
 
-    const { empleadosAsignados, ...contrato } = licencia;
-    return { ...resumirLicencia(contrato, empleadosAsignados.length, diaDeConsulta()), empleadosAsignados };
+    const { empleadosAsignados, historialAsignaciones, ...contrato } = licencia;
+    return {
+      ...resumirLicencia(contrato, empleadosAsignados.length, diaDeConsulta()),
+      empleadosAsignados,
+      ...(historialAsignaciones !== undefined ? { historialAsignaciones } : {}),
+    };
   }
 }

@@ -1,4 +1,4 @@
-import type { Licencia } from '../models/Licencia.js';
+import type { EstadoLicencia, Licencia } from '../models/Licencia.js';
 import type { Empleado } from '../models/Empleado.js';
 
 export interface AsignacionLicenciaDetalle {
@@ -18,6 +18,7 @@ export interface AssignLicenseInput {
   idLicencia: string;
   idEmpleado: string;
   idUsuarioAsignacion: string;
+  claveAsignacion?: string;
   nota?: string | null;
 }
 
@@ -26,6 +27,8 @@ export interface ReleaseLicenseInput {
   idLicencia?: string;
   idEmpleado?: string;
   idUsuarioLiberacion: string;
+  claveLiberacion?: string;
+  fechaLiberacion?: Date | string;
   nota?: string | null;
 }
 
@@ -33,16 +36,47 @@ export interface AssignmentResult {
   asignacion: AsignacionLicenciaDetalle;
   licencia: Licencia;
   empleado: Empleado;
+  cuposAsignados: number;
+  cuposLibresResultantes: number;
+  cuposLibresActualizados: number;
+  cuposAsignables: number;
+  porcentajeOcupacion: number;
+  estadoLicencia: EstadoLicencia;
+  reintentoRecuperado: boolean;
   correoNotificado: boolean;
   correoStatus: 'SENT' | 'SKIPPED' | 'FAILED';
   correoReason?: string;
+}
+
+export interface AssignmentPreviewResult {
+  licencia: ReturnType<typeof import('../models/Licencia.js').resumirLicencia>;
+  empleado: {
+    idEmpleado: string;
+    numeroEmpleado: string;
+    nombre: string;
+    correo: string;
+    departamento: string | null;
+    cargo: string | null;
+    activo: boolean;
+  };
+  puedeAsignar: boolean;
+  motivoRechazo: string | null;
+  cuposLibresActuales: number;
+  cuposLibresResultantes: number;
+  porcentajeOcupacionActual: number;
+  porcentajeOcupacionResultante: number;
 }
 
 export interface ReleaseResult {
   asignacion: AsignacionLicenciaDetalle;
   licencia: Licencia;
   empleado: Empleado;
+  cuposAsignados: number;
   cuposLibresActualizados: number;
+  cuposAsignables: number;
+  porcentajeOcupacion: number;
+  estadoLicencia: EstadoLicencia;
+  reintentoRecuperado: boolean;
 }
 
 /**
@@ -71,6 +105,16 @@ export interface ILicenseAssignmentRepository {
   buscarAsignacionPorId(
     idAsignacionLicencia: string,
   ): Promise<AsignacionLicenciaDetalle | null>;
+
+  buscarAsignacionPorClave?(
+    claveAsignacion: string,
+  ): Promise<AsignacionLicenciaDetalle | null>;
+
+  buscarAsignacionPorClaveLiberacion?(
+    claveLiberacion: string,
+  ): Promise<AsignacionLicenciaDetalle | null>;
+
+  obtenerNombreUsuario?(idUsuario: string): Promise<string | null>;
 
   contarCuposOcupados(idLicencia: string): Promise<number>;
   obtenerLicencia(idLicencia: string): Promise<Licencia | null>;

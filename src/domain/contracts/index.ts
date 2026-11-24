@@ -102,8 +102,16 @@ export type {
   AssignLicenseInput,
   ReleaseLicenseInput,
   AssignmentResult,
+  AssignmentPreviewResult,
   ReleaseResult,
   ILicenseAssignmentRepository,
   ILicenseUnitOfWork,
   IAssignmentNotificationDispatcher,
 } from './licenseAssignment.js';
+
+export type {
+  FiltroLicencias,
+  ILicenciaRepository,
+  ILicenciaReadModel,
+  ILicenseHistoryReadModel,
+} from './licencias.js';

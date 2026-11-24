@@ -30,6 +30,32 @@ export interface CupoAsignado {
   };
 }
 
+export interface MovimientoLicenciaHistorial {
+  idAsignacionLicencia: string;
+  estado: 'ACTIVA' | 'LIBERADA';
+  asignadoEn: Date;
+  liberadoEn: Date | null;
+  claveAsignacion: string;
+  claveLiberacion: string | null;
+  nota: string | null;
+  empleado: {
+    idEmpleado: string;
+    numeroEmpleado: string;
+    nombre: string;
+    correo: string;
+    departamento: string | null;
+    activo: boolean;
+  };
+  asignadoPor: {
+    idUsuario: string;
+    nombre: string;
+  };
+  liberadoPor: {
+    idUsuario: string;
+    nombre: string;
+  } | null;
+}
+
 const fechaLocal = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Mexico_City' });
 const unDia = 86_400_000;
 
