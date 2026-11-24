@@ -52,6 +52,9 @@ import { SearchEmployeesController } from '../../presentation/controllers/Search
 import { SearchEmployeesSelectorController } from '../../presentation/controllers/SearchEmployeesSelectorController.js';
 import { AssignLicenseController } from '../../presentation/controllers/AssignLicenseController.js';
 import { ReleaseLicenseController } from '../../presentation/controllers/ReleaseLicenseController.js';
+import { PrismaDashboardRepository } from '../repositories/PrismaDashboardRepository.js';
+import { GetDashboardMetricsQueryHandler } from '../../application/queries/dashboard/GetDashboardMetricsQueryHandler.js';
+import { DashboardController } from '../../presentation/controllers/DashboardController.js';
 
 // 1. Repositorios y ReadModels (Persistencia)
 export const userRepository = new UserRepository();
@@ -150,3 +153,8 @@ export const searchEmployeesController = new SearchEmployeesController(searchEmp
 export const searchEmployeesSelectorController = new SearchEmployeesSelectorController(searchEmployeesSelectorQueryHandler);
 export const assignLicenseController = new AssignLicenseController(assignLicenseCommandHandler);
 export const releaseLicenseController = new ReleaseLicenseController(releaseLicenseCommandHandler);
+
+// 7. Componentes para HU08 (Dashboard de Métricas y Actividad)
+export const dashboardRepository = new PrismaDashboardRepository();
+export const getDashboardMetricsQueryHandler = new GetDashboardMetricsQueryHandler(dashboardRepository);
+export const dashboardController = new DashboardController(getDashboardMetricsQueryHandler);
