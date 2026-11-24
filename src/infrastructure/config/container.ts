@@ -39,6 +39,19 @@ import {
 import { notificationControllerFactory } from '../../presentation/controllers/NotificationController.js';
 import { AuthGuard } from '../../presentation/middlewares/authGuard.js';
 import { crearGuardiaSesionActiva } from '../../presentation/middlewares/activeSession.js';
+import { PrismaEmployeeSearchRepository } from '../repositories/PrismaEmployeeSearchRepository.js';
+import { PrismaLicenseAssignmentRepository } from '../repositories/PrismaLicenseAssignmentRepository.js';
+import { PrismaLicenseUnitOfWork } from '../repositories/PrismaLicenseUnitOfWork.js';
+import { ResilientAssignmentNotificationDispatcher } from '../services/ResilientAssignmentNotificationDispatcher.js';
+import { EmailRetryPolicy } from '../../application/services/EmailRetryPolicy.js';
+import { SearchEmployeesQueryHandler } from '../../application/queries/empleados/SearchEmployeesQueryHandler.js';
+import { SearchEmployeesSelectorQueryHandler } from '../../application/queries/empleados/SearchEmployeesSelectorQueryHandler.js';
+import { AssignLicenseCommandHandler } from '../../application/commands/licencias/AssignLicenseCommandHandler.js';
+import { ReleaseLicenseCommandHandler } from '../../application/commands/licencias/ReleaseLicenseCommandHandler.js';
+import { SearchEmployeesController } from '../../presentation/controllers/SearchEmployeesController.js';
+import { SearchEmployeesSelectorController } from '../../presentation/controllers/SearchEmployeesSelectorController.js';
+import { AssignLicenseController } from '../../presentation/controllers/AssignLicenseController.js';
+import { ReleaseLicenseController } from '../../presentation/controllers/ReleaseLicenseController.js';
 
 // 1. Repositorios y ReadModels (Persistencia)
 export const userRepository = new UserRepository();
@@ -113,3 +126,27 @@ export const notificationController = notificationControllerFactory({
   sendWelcomeEmailHandler,
   sendAssignmentNoticeHandler,
 });
+
+// 6. Componentes para HU03, HU06 y HU07 (CQRS + SOLID)
+export const employeeSearchRepository = new PrismaEmployeeSearchRepository();
+export const licenseAssignmentRepository = new PrismaLicenseAssignmentRepository();
+export const licenseUnitOfWork = new PrismaLicenseUnitOfWork();
+
+export const emailRetryPolicy = new EmailRetryPolicy();
+export const assignmentNotificationDispatcher = new ResilientAssignmentNotificationDispatcher(
+  sendAssignmentNoticeHandler,
+  emailRetryPolicy,
+);
+
+export const searchEmployeesQueryHandler = new SearchEmployeesQueryHandler(employeeSearchRepository);
+export const searchEmployeesSelectorQueryHandler = new SearchEmployeesSelectorQueryHandler(employeeSearchRepository);
+export const assignLicenseCommandHandler = new AssignLicenseCommandHandler(
+  licenseUnitOfWork,
+  assignmentNotificationDispatcher,
+);
+export const releaseLicenseCommandHandler = new ReleaseLicenseCommandHandler(licenseUnitOfWork);
+
+export const searchEmployeesController = new SearchEmployeesController(searchEmployeesQueryHandler);
+export const searchEmployeesSelectorController = new SearchEmployeesSelectorController(searchEmployeesSelectorQueryHandler);
+export const assignLicenseController = new AssignLicenseController(assignLicenseCommandHandler);
+export const releaseLicenseController = new ReleaseLicenseController(releaseLicenseCommandHandler);

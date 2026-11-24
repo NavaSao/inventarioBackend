@@ -89,3 +89,21 @@ export type {
   IMailService,
   IMailTemplateRenderer,
 } from './mail.js';
+
+export type {
+  EmployeeFilterCriteria,
+  EmployeeSelectorCriteria,
+  EmployeeSelectorItem,
+  IEmployeeSearchReadModel,
+} from './employeeSearch.js';
+
+export type {
+  AsignacionLicenciaDetalle,
+  AssignLicenseInput,
+  ReleaseLicenseInput,
+  AssignmentResult,
+  ReleaseResult,
+  ILicenseAssignmentRepository,
+  ILicenseUnitOfWork,
+  IAssignmentNotificationDispatcher,
+} from './licenseAssignment.js';
