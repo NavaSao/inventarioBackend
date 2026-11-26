@@ -97,6 +97,10 @@ export class EmpleadoRepository implements IEmpleadoRepository, IEmpleadoReadMod
     });
   }
 
+  async contarActivosAsignados(idEmpleado: string): Promise<number> {
+    return prisma.asignacionActivo.count({ where: { idEmpleado, devueltoEn: null } });
+  }
+
   async listar(): Promise<EmpleadoResumen[]> {
     const filas = await prisma.empleado.findMany({
       orderBy: { creadoEn: 'desc' },

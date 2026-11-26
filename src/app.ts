@@ -3,6 +3,9 @@ import authRoutes from './presentation/routes/authRoutes.js';
 import licenciaRoutes from './presentation/routes/licenciaRoutes.js';
 import notificationRoutes from './presentation/routes/notificationRoutes.js';
 import empleadoRoutes from './presentation/routes/empleadoRoutes.js';
+import dashboardRoutes from './presentation/routes/dashboardRoutes.js';
+import activoRoutes from './presentation/routes/activoRoutes.js';
+import { DIRECTORIO_UPLOADS } from './infrastructure/services/LocalFotoStorage.js';
 import { errorHandler } from './presentation/middlewares/errorHandler.js';
 
 const app = express();
@@ -21,11 +24,22 @@ app.get('/health', (_req, res) => {
   });
 });
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin ?? '*');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Idempotency-Key');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  if (req.method === 'OPTIONS') { res.sendStatus(204); return; }
+  next();
+});
+
 // Montaje de rutas modulares (Arquitectura CQRS)
 app.use('/api/auth', authRoutes);
 app.use('/api/licencias', licenciaRoutes);
 app.use('/api/notificaciones', notificationRoutes);
 app.use('/api/empleados', empleadoRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/activos', activoRoutes);
+app.use('/uploads', express.static(DIRECTORIO_UPLOADS));
 
 // Manejador centralizado de errores
 app.use(errorHandler);

@@ -56,6 +56,32 @@ import { AssignLicenseController } from '../../presentation/controllers/AssignLi
 import { ReleaseLicenseController } from '../../presentation/controllers/ReleaseLicenseController.js';
 import { PreviewLicenseAssignmentController } from '../../presentation/controllers/PreviewLicenseAssignmentController.js';
 import { GetLicenseHistoryController } from '../../presentation/controllers/GetLicenseHistoryController.js';
+import { ActivoRepository } from '../repositories/ActivoRepository.js';
+import { LocalFotoStorage } from '../services/LocalFotoStorage.js';
+import { ConsultarActivoHandler, ListarActivosHandler } from '../../application/queries/activos/ActivoHandlers.js';
+import {
+  EditarActivoHandler,
+  RegistrarActivoHandler,
+  SubirFotoActivoHandler,
+} from '../../application/commands/activos/ActivoCatalogoHandlers.js';
+import {
+  AsignarActivoHandler,
+  CerrarMantenimientoHandler,
+  DevolverActivoHandler,
+  IniciarMantenimientoHandler,
+} from '../../application/commands/activos/MovimientoActivoHandlers.js';
+import {
+  AsignarActivoController,
+  CerrarMantenimientoController,
+  ConsultarActivoController,
+  DevolverActivoController,
+  EditarActivoController,
+  EscanearActivoController,
+  IniciarMantenimientoController,
+  ListarActivosController,
+  RegistrarActivoController,
+  SubirFotoActivoController,
+} from '../../presentation/controllers/ActivoControllers.js';
 
 // 1. Repositorios y ReadModels (Persistencia)
 export const userRepository = new UserRepository();
@@ -163,4 +189,40 @@ export const previewLicenseAssignmentController = new PreviewLicenseAssignmentCo
 );
 export const getLicenseHistoryController = new GetLicenseHistoryController(
   getLicenseHistoryQueryHandler,
+);
+
+// Dashboard (resumen de métricas)
+import { PrismaDashboardReadModel } from '../repositories/PrismaDashboardReadModel.js';
+import { GetDashboardQueryHandler } from '../../application/queries/dashboard/GetDashboardQueryHandler.js';
+import { GetDashboardController } from '../../presentation/controllers/GetDashboardController.js';
+
+export const getDashboardController = new GetDashboardController(
+  new GetDashboardQueryHandler(new PrismaDashboardReadModel()),
+);
+
+// Inventario de hardware, escaneo, asignación/devolución y mantenimiento
+const activoRepository = new ActivoRepository();
+const consultarActivoHandler = new ConsultarActivoHandler(activoRepository);
+
+export const listarActivosController = new ListarActivosController(new ListarActivosHandler(activoRepository));
+export const consultarActivoController = new ConsultarActivoController(consultarActivoHandler);
+export const escanearActivoController = new EscanearActivoController(consultarActivoHandler);
+export const registrarActivoController = new RegistrarActivoController(new RegistrarActivoHandler(activoRepository));
+export const editarActivoController = new EditarActivoController(
+  new EditarActivoHandler(activoRepository, consultarActivoHandler),
+);
+export const subirFotoActivoController = new SubirFotoActivoController(
+  new SubirFotoActivoHandler(activoRepository, new LocalFotoStorage(), consultarActivoHandler),
+);
+export const asignarActivoController = new AsignarActivoController(
+  new AsignarActivoHandler(activoRepository, empleadoRepository, consultarActivoHandler),
+);
+export const devolverActivoController = new DevolverActivoController(
+  new DevolverActivoHandler(activoRepository, consultarActivoHandler),
+);
+export const iniciarMantenimientoController = new IniciarMantenimientoController(
+  new IniciarMantenimientoHandler(activoRepository, consultarActivoHandler),
+);
+export const cerrarMantenimientoController = new CerrarMantenimientoController(
+  new CerrarMantenimientoHandler(activoRepository, consultarActivoHandler),
 );

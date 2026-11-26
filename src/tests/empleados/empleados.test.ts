@@ -80,6 +80,10 @@ class InMemoryEmpleadoRepository implements IEmpleadoRepository, IEmpleadoReadMo
     return this.licenciasActivasMap.get(idEmpleado) ?? 0;
   }
 
+  async contarActivosAsignados(): Promise<number> {
+    return 0;
+  }
+
   async listar(): Promise<EmpleadoResumen[]> {
     return this.empleados.map((e) => ({
       ...e,

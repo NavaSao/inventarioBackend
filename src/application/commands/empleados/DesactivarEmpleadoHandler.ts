@@ -23,6 +23,13 @@ export class DesactivarEmpleadoHandler {
       );
     }
 
+    if (await this.repositorio.contarActivosAsignados(command.idEmpleado) > 0) {
+      throw new BusinessError(
+        'No se puede desactivar el empleado porque tiene equipos asignados. Registra antes su devolución.',
+        409,
+      );
+    }
+
     return this.repositorio.desactivar(command.idEmpleado);
   }
 }

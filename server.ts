@@ -31,6 +31,7 @@ async function startServer(): Promise<void> {
     console.log(`[*] Health Check  : http://${host}:${puerto}/health`);
     console.log(`[*] Auth API      : http://${host}:${puerto}/api/auth`);
     console.log(`[*] Licencias API : http://${host}:${puerto}/api/licencias`);
+    console.log(`[*] Activos API   : http://${host}:${puerto}/api/activos`);
     console.log(`[*] Mail API      : http://${host}:${puerto}/api/notificaciones`);
     console.log('======================================================\n');
   });

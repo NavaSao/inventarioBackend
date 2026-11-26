@@ -11,6 +11,7 @@ export interface IEmpleadoRepository {
   buscarPorCorreo(correo: string): Promise<Empleado | null>;
   buscarPorNumeroEmpleado(numeroEmpleado: string): Promise<Empleado | null>;
   contarLicenciasActivas(idEmpleado: string): Promise<number>;
+  contarActivosAsignados(idEmpleado: string): Promise<number>;
 }
 
 /**
