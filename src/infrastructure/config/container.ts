@@ -56,6 +56,9 @@ import { AssignLicenseController } from '../../presentation/controllers/AssignLi
 import { ReleaseLicenseController } from '../../presentation/controllers/ReleaseLicenseController.js';
 import { PreviewLicenseAssignmentController } from '../../presentation/controllers/PreviewLicenseAssignmentController.js';
 import { GetLicenseHistoryController } from '../../presentation/controllers/GetLicenseHistoryController.js';
+import { PrismaDashboardRepository } from '../repositories/PrismaDashboardRepository.js';
+import { GetDashboardMetricsQueryHandler } from '../../application/queries/dashboard/GetDashboardMetricsQueryHandler.js';
+import { DashboardController } from '../../presentation/controllers/DashboardController.js';
 
 // 1. Repositorios y ReadModels (Persistencia)
 export const userRepository = new UserRepository();
@@ -164,3 +167,8 @@ export const previewLicenseAssignmentController = new PreviewLicenseAssignmentCo
 export const getLicenseHistoryController = new GetLicenseHistoryController(
   getLicenseHistoryQueryHandler,
 );
+
+// 7. Componentes para HU08 (Dashboard de Métricas y Actividad)
+export const dashboardRepository = new PrismaDashboardRepository();
+export const getDashboardMetricsQueryHandler = new GetDashboardMetricsQueryHandler(dashboardRepository);
+export const dashboardController = new DashboardController(getDashboardMetricsQueryHandler);
