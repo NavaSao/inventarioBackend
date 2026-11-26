@@ -25,11 +25,14 @@ async function crearAdmin(): Promise<void> {
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
   const { count } = await prisma.usuario.createMany({
-    data: [{ nombre: 'Administrador de TI', correo, passwordHash }],
+    data: [
+      { nombre: 'Administrador de TI', correo, passwordHash },
+      { nombre: 'Administrador de TI', correo: 'admin@assetops.com', passwordHash },
+    ],
     skipDuplicates: true,
   });
 
-  console.log(count ? 'Cuenta administrativa creada.' : 'La cuenta ya existe.');
+  console.log(count ? `Se crearon ${count} cuenta(s) administrativa(s).` : 'Las cuentas ya existen.');
 }
 
 try {

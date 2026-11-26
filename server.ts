@@ -4,7 +4,7 @@ import { prisma } from './src/infrastructure/config/database.js';
 import { mailConfig } from './src/infrastructure/config/mail.js';
 
 const puerto = Number(process.env.PORT || 3000);
-const host = process.env.HOST || '127.0.0.1';
+const host = process.env.HOST || '0.0.0.0';
 
 async function startServer(): Promise<void> {
   console.log('\n[*] Iniciando servicios de AssetOps Backend (Clean Architecture + CQRS)...');

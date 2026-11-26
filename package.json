@@ -10,6 +10,7 @@
     "dev": "tsx watch server.ts",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
     "admin:crear": "tsx scripts/crearAdmin.ts",
+    "db:seed": "tsx scripts/sembrarLicencias.ts",
     "mail:test": "tsx scripts/probarCorreo.ts",
     "typecheck": "tsc --noEmit",
     "db:up": "docker compose up -d --wait postgres",

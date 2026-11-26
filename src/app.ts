@@ -8,7 +8,18 @@ import { errorHandler } from './presentation/middlewares/errorHandler.js';
 
 const app = express();
 
-// Middlewares globales de seguridad y serialización
+// Middlewares globales de seguridad, CORS y serialización
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(204);
+    return;
+  }
+  next();
+});
+
 app.use(express.json({ limit: '4kb' }));
 app.use(express.urlencoded({ extended: true }));
 
