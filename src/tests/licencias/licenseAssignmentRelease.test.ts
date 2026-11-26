@@ -884,9 +884,10 @@ describe('HU06 y HU07: Asignación y Liberación de Licencias (Transacciones, Co
       expect(retryRes.body.data.cuposAsignados).toBe(1);
 
       // 4. Liberar con fecha válida
+      const hoyISO = new Date().toISOString().slice(0, 10);
       const releaseRes = await invokeWithErrorHandler(releaseCtrl.execute, {
         params: { idAsignacionLicencia: idAsignacion },
-        body: { fechaLiberacion: '2026-11-24', nota: 'Devolución en tiempo' },
+        body: { fechaLiberacion: hoyISO, nota: 'Devolución en tiempo' },
       });
 
       expect(releaseRes.status).toBe(200);
