@@ -1,10 +1,10 @@
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
-import { GetLicenseHistoryQuery } from '../../application/queries/licencias/GetLicenseHistoryQuery.js';
-import type { GetLicenseHistoryQueryHandler } from '../../application/queries/licencias/GetLicenseHistoryQueryHandler.js';
+import { GetLicenseHistoryQuery } from '../../application/licencias/queries/historial-licencia/GetLicenseHistoryQuery.js';
+import type { GetLicenseHistoryQueryHandler } from '../../application/licencias/queries/historial-licencia/GetLicenseHistoryQueryHandler.js';
 import { ValidationError } from '../../domain/exceptions/ValidationError.js';
 import { ResponseBuilder } from '../../infrastructure/utils/responseBuilder.js';
-import { assignLicenseParamSchema } from '../validators/licenseAssignmentValidator.js';
+import { licenciaMovimientoParamSchema } from '../../application/licencias/validacionMovimiento.js';
 
 /**
  * Single Action Controller para consultar el historial de movimientos de una licencia (HU07).
@@ -14,7 +14,7 @@ export class GetLicenseHistoryController {
 
   execute = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const params = assignLicenseParamSchema.parse(req.params);
+      const params = licenciaMovimientoParamSchema.parse(req.params);
       const historial = await this.handler.handle(new GetLicenseHistoryQuery(params.idLicencia));
       ResponseBuilder.success(res, historial, 'Historial de licencia consultado', 200);
     } catch (error) {

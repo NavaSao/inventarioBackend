@@ -9,7 +9,7 @@ Cliente Móvil (POST)
        ↓
 [1] Express Router (src/routes/authRoutes.ts)
        ↓
-[2] Validator Middleware (src/validators/authValidator.ts)
+[2] Validator Middleware (src/application/auth/commands/login/LoginValidator.ts)
     • Verifica con Zod: formato de correo válido y contraseña <= 72 bytes.
     • Si falla: lanza ValidationError (400) -> errorHandler.
        ↓

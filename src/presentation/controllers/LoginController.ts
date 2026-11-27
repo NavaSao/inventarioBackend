@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
-import { LoginCommand } from '../../application/commands/auth/LoginCommand.js';
-import type { LoginCommandHandler } from '../../application/commands/auth/LoginCommandHandler.js';
+import { LoginCommand } from '../../application/auth/commands/login/LoginCommand.js';
+import type { LoginCommandHandler } from '../../application/auth/commands/login/LoginCommandHandler.js';
 import { ResponseBuilder } from '../../infrastructure/utils/responseBuilder.js';
 
 /**

@@ -1,4 +1,4 @@
-import type { IDashboardReadModel } from '../../domain/contracts/dashboard.js';
+import type { IDashboardReadModel } from '../../domain/contracts/IDashboardReadModel.js';
 import type {
   ContratoResumenDashboard,
   MovimientoRecienteDashboard,

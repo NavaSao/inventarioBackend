@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
-import { SendWelcomeEmailCommand } from '../../application/commands/notifications/SendWelcomeEmailCommand.js';
-import type { SendWelcomeEmailHandler } from '../../application/commands/notifications/SendWelcomeEmailHandler.js';
-import { SendAssignmentNoticeCommand } from '../../application/commands/notifications/SendAssignmentNoticeCommand.js';
-import type { SendAssignmentNoticeHandler } from '../../application/commands/notifications/SendAssignmentNoticeHandler.js';
+import { SendWelcomeEmailCommand } from '../../application/notifications/commands/correo-bienvenida/SendWelcomeEmailCommand.js';
+import type { SendWelcomeEmailHandler } from '../../application/notifications/commands/correo-bienvenida/SendWelcomeEmailHandler.js';
+import { SendAssignmentNoticeCommand } from '../../application/notifications/commands/aviso-asignacion/SendAssignmentNoticeCommand.js';
+import type { SendAssignmentNoticeHandler } from '../../application/notifications/commands/aviso-asignacion/SendAssignmentNoticeHandler.js';
 import type { AssignmentNoticeData } from '../../domain/contracts/mail.js';
 import { ResponseBuilder } from '../../infrastructure/utils/responseBuilder.js';
 

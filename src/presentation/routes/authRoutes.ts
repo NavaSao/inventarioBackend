@@ -5,9 +5,11 @@ import {
   validateSessionController,
   authGuard,
 } from '../../infrastructure/config/container.js';
-import { validateLogin } from '../validators/authValidator.js';
+import { loginSchema } from '../../application/auth/commands/login/LoginValidator.js';
+import { validarBody } from '../middlewares/validarBody.js';
 
 const router = Router();
+const validateLogin = validarBody(loginSchema, 'Datos de inicio de sesión inválidos');
 
 // Command (Escritura): Iniciar sesión con generación de JWT
 router.post('/login', validateLogin, loginController.execute);

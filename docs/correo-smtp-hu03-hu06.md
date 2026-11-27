@@ -22,7 +22,7 @@ Cliente / Módulo del Backend (POST /api/notificaciones/* o invocación directa 
        ↓
 [Capa 4 — Presentación]
   • notificationRoutes.ts      -> Protege rutas con authMiddleware (JWT)
-  • notificationValidator.ts   -> Valida payloads con Zod v4 (400 ValidationError si falla)
+  • validarBody.ts             -> Aplica el validador del caso de uso (400 si falla)
   • NotificationController.ts  -> Construye el Command CQRS y delega al Handler
        ↓
 [Capa 2 — Aplicación (CQRS Commands)]
@@ -235,14 +235,14 @@ Se confirma el envío automático con la insignia `ASIGNACIÓN DE LICENCIA` y el
 | Ruta | Capa | Responsabilidad |
 | --- | --- | --- |
 | `src/domain/contracts/mail.ts` | Dominio | Interfaces `IMailService`, `IMailTemplateRenderer` y DTOs (`MailMessage`, `EmailDispatchResult`, `WelcomeEmailData`, `AssignmentNoticeData`). |
-| `src/application/commands/notifications/SendWelcomeEmailCommand.ts` | Aplicación | Command DTO para correo de bienvenida opcional (HU03). |
-| `src/application/commands/notifications/SendWelcomeEmailHandler.ts` | Aplicación | Caso de uso HU03 con control opcional y tolerancia a fallos SMTP. |
-| `src/application/commands/notifications/SendAssignmentNoticeCommand.ts` | Aplicación | Command DTO para aviso automático de asignación de activo o licencia (HU06). |
-| `src/application/commands/notifications/SendAssignmentNoticeHandler.ts` | Aplicación | Caso de uso HU06 que renderiza y despacha el aviso automático con manejo seguro de errores. |
+| `src/application/notifications/commands/correo-bienvenida/SendWelcomeEmailCommand.ts` | Aplicación | Command DTO para correo de bienvenida opcional (HU03). |
+| `src/application/notifications/commands/correo-bienvenida/SendWelcomeEmailHandler.ts` | Aplicación | Caso de uso HU03 con control opcional y tolerancia a fallos SMTP. |
+| `src/application/notifications/commands/aviso-asignacion/SendAssignmentNoticeCommand.ts` | Aplicación | Command DTO para aviso automático de asignación de activo o licencia (HU06). |
+| `src/application/notifications/commands/aviso-asignacion/SendAssignmentNoticeHandler.ts` | Aplicación | Caso de uso HU06 que renderiza y despacha el aviso automático con manejo seguro de errores. |
 | `src/infrastructure/config/mail.ts` | Infraestructura | Lectura y normalización de variables de entorno SMTP (`loadMailConfig`, `mailConfig`). |
 | `src/infrastructure/services/NodemailerMailService.ts` | Infraestructura | Adaptador SMTP con Nodemailer implementando `IMailService`. |
 | `src/infrastructure/services/MailTemplateRenderer.ts` | Infraestructura | Renderizador seguro de plantillas HTML y texto plano para HU03 y HU06. |
-| `src/presentation/validators/notificationValidator.ts` | Presentación | Esquemas y middlewares de validación Zod v4 para bienvenida, asignación y prueba. |
+| `src/presentation/middlewares/validarBody.ts` | Presentación | Aplica los esquemas Zod de bienvenida, asignación y prueba que viven en sus carpetas de aplicación. |
 | `src/presentation/controllers/NotificationController.ts` | Presentación | Controlador factory (`enviarBienvenida`, `enviarAvisoAsignacion`, `probarEnvio`). |
 | `src/presentation/routes/notificationRoutes.ts` | Presentación | Enrutador Express `/api/notificaciones/*` protegido con `authMiddleware`. |
 | `scripts/probarCorreo.ts` | Verificación / CLI | Script standalone (`npm run mail:test`) para validar SMTP, HU03, HU06 y resiliencia. |

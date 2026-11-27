@@ -1,16 +1,12 @@
 import type { NextFunction, Request, Response } from 'express';
-import type { IRegistrarLicenciaHandler } from '../../application/commands/licencias/RegistrarLicenciaHandler.js';
-import type {
-  ConsultarLicenciaHandler,
-  ListarLicenciasHandler,
-} from '../../application/queries/licencias/LicenciaHandlers.js';
+import type { IRegistrarLicenciaHandler } from '../../application/licencias/commands/registrar-licencia/IRegistrarLicenciaHandler.js';
+import type { ConsultarLicenciaHandler } from '../../application/licencias/queries/consultar-licencia/ConsultarLicenciaHandler.js';
+import type { ListarLicenciasHandler } from '../../application/licencias/queries/listar-licencias/ListarLicenciasHandler.js';
 import { ResponseBuilder } from '../../infrastructure/utils/responseBuilder.js';
-import {
-  filtrosLicenciaSchema,
-  parametrosLicenciaSchema,
-  registroLicenciaSchema,
-  validarLicencia,
-} from '../validators/licenciaValidator.js';
+import { filtrosLicenciaSchema } from '../../application/licencias/queries/listar-licencias/ListarLicenciasValidator.js';
+import { parametrosLicenciaSchema } from '../../application/licencias/queries/consultar-licencia/ConsultarLicenciaValidator.js';
+import { registroLicenciaSchema } from '../../application/licencias/commands/registrar-licencia/RegistrarLicenciaValidator.js';
+import { validarLicencia } from '../../application/licencias/validacionLicencia.js';
 
 export class RegistrarLicenciaController {
   constructor(private readonly casoDeUso: IRegistrarLicenciaHandler) {}

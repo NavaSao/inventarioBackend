@@ -4,13 +4,15 @@ import {
   guardiaSesionActiva,
   notificationController,
 } from '../../infrastructure/config/container.js';
-import {
-  validateAssignmentNotice,
-  validateTestEmail,
-  validateWelcomeEmail,
-} from '../validators/notificationValidator.js';
+import { assignmentNoticeSchema } from '../../application/notifications/commands/aviso-asignacion/SendAssignmentNoticeValidator.js';
+import { testEmailSchema } from '../../application/notifications/commands/correo-prueba/TestEmailValidator.js';
+import { welcomeEmailSchema } from '../../application/notifications/commands/correo-bienvenida/SendWelcomeEmailValidator.js';
+import { validarBody } from '../middlewares/validarBody.js';
 
 const router = Router();
+const validateWelcomeEmail = validarBody(welcomeEmailSchema, 'Datos inválidos para el correo de bienvenida (HU03)');
+const validateAssignmentNotice = validarBody(assignmentNoticeSchema, 'Datos inválidos para el aviso de asignación (HU06)');
+const validateTestEmail = validarBody(testEmailSchema, 'Datos inválidos para el envío de correo de prueba');
 
 // Todas las rutas de notificaciones requieren JWT válido y sesión activa no revocada (HU02)
 router.use(authGuard.handle, guardiaSesionActiva);

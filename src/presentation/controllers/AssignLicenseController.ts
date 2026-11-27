@@ -1,15 +1,13 @@
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
-import { AssignLicenseCommand } from '../../application/commands/licencias/AssignLicenseCommand.js';
-import type { AssignLicenseCommandHandler } from '../../application/commands/licencias/AssignLicenseCommandHandler.js';
+import { AssignLicenseCommand } from '../../application/licencias/commands/asignar-licencia/AssignLicenseCommand.js';
+import type { AssignLicenseCommandHandler } from '../../application/licencias/commands/asignar-licencia/AssignLicenseCommandHandler.js';
 import { BusinessError } from '../../domain/exceptions/BusinessError.js';
 import { ValidationError } from '../../domain/exceptions/ValidationError.js';
 import { ResponseBuilder } from '../../infrastructure/utils/responseBuilder.js';
-import {
-  assignLicenseBodySchema,
-  assignLicenseParamSchema,
-  extractIdempotencyKey,
-} from '../validators/licenseAssignmentValidator.js';
+import { assignLicenseBodySchema } from '../../application/licencias/commands/asignar-licencia/AssignLicenseValidator.js';
+import { licenciaMovimientoParamSchema } from '../../application/licencias/validacionMovimiento.js';
+import { extractIdempotencyKey } from '../utils/extractIdempotencyKey.js';
 
 /**
  * Single Action Controller para Asignación de Licencias (HU06).
@@ -24,7 +22,7 @@ export class AssignLicenseController {
         throw new BusinessError('Acceso no autorizado: Se requiere sesión activa', 401);
       }
 
-      const params = assignLicenseParamSchema.parse(req.params);
+      const params = licenciaMovimientoParamSchema.parse(req.params);
       const body = assignLicenseBodySchema.parse(req.body);
       const headerKey = extractIdempotencyKey(req.headers as Record<string, unknown> | undefined);
 

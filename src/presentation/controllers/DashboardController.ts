@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
-import type { IGetDashboardMetricsQueryHandler } from '../../application/queries/dashboard/GetDashboardMetricsQueryHandler.js';
-import { GetDashboardMetricsQuery } from '../../application/queries/dashboard/GetDashboardMetricsQuery.js';
+import type { IGetDashboardMetricsQueryHandler } from '../../application/dashboard/queries/metricas-dashboard/IGetDashboardMetricsQueryHandler.js';
+import { GetDashboardMetricsQuery } from '../../application/dashboard/queries/metricas-dashboard/GetDashboardMetricsQuery.js';
 import { ResponseBuilder } from '../../infrastructure/utils/responseBuilder.js';
 
 /**

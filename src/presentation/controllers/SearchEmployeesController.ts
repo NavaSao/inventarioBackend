@@ -1,10 +1,10 @@
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
-import { SearchEmployeesQuery } from '../../application/queries/empleados/SearchEmployeesQuery.js';
-import type { SearchEmployeesQueryHandler } from '../../application/queries/empleados/SearchEmployeesQueryHandler.js';
+import { SearchEmployeesQuery } from '../../application/empleados/queries/buscar-empleados/SearchEmployeesQuery.js';
+import type { SearchEmployeesQueryHandler } from '../../application/empleados/queries/buscar-empleados/SearchEmployeesQueryHandler.js';
 import { ValidationError } from '../../domain/exceptions/ValidationError.js';
 import { ResponseBuilder } from '../../infrastructure/utils/responseBuilder.js';
-import { employeeFilterSchema } from '../validators/employeeSearchValidator.js';
+import { employeeFilterSchema } from '../../application/empleados/queries/buscar-empleados/SearchEmployeesValidator.js';
 
 /**
  * Single Action Controller para Búsqueda y Filtrado de Empleados (HU03).

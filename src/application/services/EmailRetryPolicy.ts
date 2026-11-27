@@ -1,8 +1,4 @@
-export interface RetryPolicyOptions {
-  maxRetries?: number;
-  initialDelayMs?: number;
-  backoffMultiplier?: number;
-}
+import type { RetryPolicyOptions } from './RetryPolicyOptions.js';
 
 /**
  * Política de reintentos configurable y desacoplada (SOLID - OCP).

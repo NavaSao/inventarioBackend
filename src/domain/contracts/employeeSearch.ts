@@ -1,5 +1,3 @@
-import type { EmpleadoResumen } from '../models/Empleado.js';
-
 /**
  * Criterios de filtrado combinable para empleados (HU03).
  */
@@ -32,10 +30,4 @@ export interface EmployeeSelectorItem {
   activo: boolean;
 }
 
-/**
- * Modelo de lectura segregado (ISP) exclusivo para consultas y filtros de empleados (CQRS - Query).
- */
-export interface IEmployeeSearchReadModel {
-  buscar(criterios: EmployeeFilterCriteria): Promise<EmpleadoResumen[]>;
-  buscarParaSelector(criterios: EmployeeSelectorCriteria): Promise<EmployeeSelectorItem[]>;
-}
+export type { IEmployeeSearchReadModel } from './IEmployeeSearchReadModel.js';
