@@ -2,21 +2,19 @@ import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import type { Request, Response } from 'express';
 import type { IEmpleadoReadModel, IEmpleadoRepository } from '../../domain/contracts/empleados.js';
 import type { DatosCrearEmpleado, DatosEditarEmpleado, Empleado, EmpleadoResumen } from '../../domain/models/Empleado.js';
-import { RegistrarEmpleadoHandler } from '../../application/commands/empleados/RegistrarEmpleadoHandler.js';
-import { EditarEmpleadoHandler } from '../../application/commands/empleados/EditarEmpleadoHandler.js';
-import { DesactivarEmpleadoHandler } from '../../application/commands/empleados/DesactivarEmpleadoHandler.js';
-import { ListarEmpleadosHandler } from '../../application/queries/empleados/ListarEmpleadosHandler.js';
+import { RegistrarEmpleadoHandler } from '../../application/empleados/commands/registrar-empleado/RegistrarEmpleadoHandler.js';
+import { EditarEmpleadoHandler } from '../../application/empleados/commands/editar-empleado/EditarEmpleadoHandler.js';
+import { DesactivarEmpleadoHandler } from '../../application/empleados/commands/desactivar-empleado/DesactivarEmpleadoHandler.js';
+import { ListarEmpleadosHandler } from '../../application/empleados/queries/listar-empleados/ListarEmpleadosHandler.js';
 import {
   DesactivarEmpleadoController,
   EditarEmpleadoController,
   ListarEmpleadosController,
   RegistrarEmpleadoController,
 } from '../../presentation/controllers/EmpleadoControllers.js';
-import {
-  editarEmpleadoSchema,
-  parametrosEmpleadoSchema,
-  registroEmpleadoSchema,
-} from '../../presentation/validators/empleadoValidator.js';
+import { editarEmpleadoSchema } from '../../application/empleados/commands/editar-empleado/EditarEmpleadoValidator.js';
+import { parametrosEmpleadoSchema } from '../../application/empleados/validacionEmpleado.js';
+import { registroEmpleadoSchema } from '../../application/empleados/commands/registrar-empleado/RegistrarEmpleadoValidator.js';
 import { BusinessError } from '../../domain/exceptions/BusinessError.js';
 import { ValidationError } from '../../domain/exceptions/ValidationError.js';
 

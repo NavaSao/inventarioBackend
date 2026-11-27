@@ -1,10 +1,10 @@
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
-import { SearchEmployeesSelectorQuery } from '../../application/queries/empleados/SearchEmployeesSelectorQuery.js';
-import type { SearchEmployeesSelectorQueryHandler } from '../../application/queries/empleados/SearchEmployeesSelectorQueryHandler.js';
+import { SearchEmployeesSelectorQuery } from '../../application/empleados/queries/seleccionar-empleados/SearchEmployeesSelectorQuery.js';
+import type { SearchEmployeesSelectorQueryHandler } from '../../application/empleados/queries/seleccionar-empleados/SearchEmployeesSelectorQueryHandler.js';
 import { ValidationError } from '../../domain/exceptions/ValidationError.js';
 import { ResponseBuilder } from '../../infrastructure/utils/responseBuilder.js';
-import { employeeSelectorSchema } from '../validators/employeeSearchValidator.js';
+import { employeeSelectorSchema } from '../../application/empleados/queries/seleccionar-empleados/SearchEmployeesSelectorValidator.js';
 
 /**
  * Single Action Controller para el Selector Rápido de Empleados (HU03).

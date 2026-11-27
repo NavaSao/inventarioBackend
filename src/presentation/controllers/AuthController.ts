@@ -1,12 +1,12 @@
 import type { Request, Response, NextFunction } from 'express';
 import type { ParamsDictionary } from 'express-serve-static-core';
-import { LoginCommand } from '../../application/commands/auth/LoginCommand.js';
-import { GetSessionQuery } from '../../application/queries/auth/GetSessionQuery.js';
-import type { ILoginHandler } from '../../application/commands/auth/LoginHandler.js';
-import type { IGetSessionHandler } from '../../application/queries/auth/GetSessionHandler.js';
+import { LoginCommand } from '../../application/auth/commands/login/LoginCommand.js';
+import { GetSessionQuery } from '../../application/auth/queries/get-session/GetSessionQuery.js';
+import type { ILoginHandler } from '../../application/auth/commands/login/ILoginHandler.js';
+import type { IGetSessionHandler } from '../../application/auth/queries/get-session/IGetSessionHandler.js';
 import { ResponseBuilder } from '../../infrastructure/utils/responseBuilder.js';
 import { BusinessError } from '../../domain/exceptions/BusinessError.js';
-import type { LoginBody } from '../validators/authValidator.js';
+import type { LoginBody } from '../../application/auth/commands/login/LoginValidator.js';
 
 export interface AuthControllerDeps {
   loginHandler: ILoginHandler;

@@ -1,7 +1,7 @@
 import { describe, expect, it } from '@jest/globals';
-import { ConsultarLicenciaHandler } from '../../application/queries/licencias/LicenciaHandlers.js';
+import { ConsultarLicenciaHandler } from '../../application/licencias/queries/consultar-licencia/ConsultarLicenciaHandler.js';
 import { diaDeConsulta, resumirLicencia, type Licencia } from '../../domain/models/Licencia.js';
-import { registroLicenciaSchema } from '../../presentation/validators/licenciaValidator.js';
+import { registroLicenciaSchema } from '../../application/licencias/commands/registrar-licencia/RegistrarLicenciaValidator.js';
 
 const datos = {
   codigoLicencia: ' fig-org-2026 ',

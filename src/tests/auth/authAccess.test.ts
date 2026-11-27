@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { LoginCommandHandler } from '../../application/commands/auth/LoginCommandHandler.js';
-import { LoginCommand } from '../../application/commands/auth/LoginCommand.js';
-import { GlobalLogoutCommandHandler } from '../../application/commands/auth/GlobalLogoutCommandHandler.js';
-import { GlobalLogoutCommand } from '../../application/commands/auth/GlobalLogoutCommand.js';
-import { ValidateSessionQueryHandler } from '../../application/queries/auth/ValidateSessionQueryHandler.js';
-import { ValidateSessionQuery } from '../../application/queries/auth/ValidateSessionQuery.js';
+import { LoginCommandHandler } from '../../application/auth/commands/login/LoginCommandHandler.js';
+import { LoginCommand } from '../../application/auth/commands/login/LoginCommand.js';
+import { GlobalLogoutCommandHandler } from '../../application/auth/commands/global-logout/GlobalLogoutCommandHandler.js';
+import { GlobalLogoutCommand } from '../../application/auth/commands/global-logout/GlobalLogoutCommand.js';
+import { ValidateSessionQueryHandler } from '../../application/auth/queries/validate-session/ValidateSessionQueryHandler.js';
+import { ValidateSessionQuery } from '../../application/auth/queries/validate-session/ValidateSessionQuery.js';
 import { LoginController } from '../../presentation/controllers/LoginController.js';
 import { GlobalLogoutController } from '../../presentation/controllers/GlobalLogoutController.js';
 import { ValidateSessionController } from '../../presentation/controllers/ValidateSessionController.js';

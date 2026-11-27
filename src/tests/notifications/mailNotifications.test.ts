@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import type { Request, Response } from 'express';
-import { SendWelcomeEmailCommand } from '../../application/commands/notifications/SendWelcomeEmailCommand.js';
-import { SendWelcomeEmailHandler } from '../../application/commands/notifications/SendWelcomeEmailHandler.js';
-import { SendAssignmentNoticeCommand } from '../../application/commands/notifications/SendAssignmentNoticeCommand.js';
-import { SendAssignmentNoticeHandler } from '../../application/commands/notifications/SendAssignmentNoticeHandler.js';
+import { SendWelcomeEmailCommand } from '../../application/notifications/commands/correo-bienvenida/SendWelcomeEmailCommand.js';
+import { SendWelcomeEmailHandler } from '../../application/notifications/commands/correo-bienvenida/SendWelcomeEmailHandler.js';
+import { SendAssignmentNoticeCommand } from '../../application/notifications/commands/aviso-asignacion/SendAssignmentNoticeCommand.js';
+import { SendAssignmentNoticeHandler } from '../../application/notifications/commands/aviso-asignacion/SendAssignmentNoticeHandler.js';
 import { MailTemplateRenderer } from '../../infrastructure/services/MailTemplateRenderer.js';
 import { notificationControllerFactory } from '../../presentation/controllers/NotificationController.js';
 import type { IMailService, MailMessage, MailSendResult } from '../../domain/contracts/index.js';

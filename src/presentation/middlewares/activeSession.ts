@@ -1,6 +1,6 @@
 import type { RequestHandler } from 'express';
-import { ValidateSessionQuery } from '../../application/queries/auth/ValidateSessionQuery.js';
-import type { ValidateSessionQueryHandler } from '../../application/queries/auth/ValidateSessionQueryHandler.js';
+import { ValidateSessionQuery } from '../../application/auth/queries/validate-session/ValidateSessionQuery.js';
+import type { ValidateSessionQueryHandler } from '../../application/auth/queries/validate-session/ValidateSessionQueryHandler.js';
 import { BusinessError } from '../../domain/exceptions/BusinessError.js';
 
 // Después de verificar el JWT, confirmo que la cuenta siga activa y el token no se haya revocado.

@@ -5,6 +5,16 @@ Este backend implementa el patrón **CQRS (Command Query Responsibility Segregat
 
 ---
 
+## Dónde encontrar cada operación
+
+En `src/application`, abre el módulo y luego `commands` para cambios o `queries` para consultas.
+Por ejemplo, en [registrar-empleado](../src/application/empleados/commands/registrar-empleado)
+están juntos el comando, el handler y el validador. Los contratos de repositorios y servicios
+tienen su propio archivo en [`src/domain/contracts`](../src/domain/contracts).
+
+Los controllers siguen en `src/presentation`. Leen la petición, usan la validación
+de la operación y llaman al handler.
+
 ## 🗺️ Mapa General de Documentación
 
 | Directorio | Propósito | Enlaces |

@@ -88,18 +88,6 @@ export interface RenderedEmailTemplate {
   text: string;
 }
 
-/**
- * Puerto de salida para envío de correos electrónicos (Adaptador SMTP en Infraestructura).
- */
-export interface IMailService {
-  sendMail(message: MailMessage): Promise<MailSendResult>;
-  verifyConnection(): Promise<boolean>;
-}
+export type { IMailService } from './IMailService.js';
 
-/**
- * Puerto de renderizado de plantillas HTML y texto plano para notificaciones.
- */
-export interface IMailTemplateRenderer {
-  renderWelcomeEmail(data: WelcomeEmailData): RenderedEmailTemplate;
-  renderAssignmentNoticeEmail(data: AssignmentNoticeData): RenderedEmailTemplate;
-}
+export type { IMailTemplateRenderer } from './IMailTemplateRenderer.js';

@@ -3,10 +3,10 @@ import nodemailer from 'nodemailer';
 import { loadMailConfig, type MailConfig } from '../src/infrastructure/config/mail.js';
 import { NodemailerMailService } from '../src/infrastructure/services/NodemailerMailService.js';
 import { MailTemplateRenderer } from '../src/infrastructure/services/MailTemplateRenderer.js';
-import { SendWelcomeEmailCommand } from '../src/application/commands/notifications/SendWelcomeEmailCommand.js';
-import { SendWelcomeEmailHandler } from '../src/application/commands/notifications/SendWelcomeEmailHandler.js';
-import { SendAssignmentNoticeCommand } from '../src/application/commands/notifications/SendAssignmentNoticeCommand.js';
-import { SendAssignmentNoticeHandler } from '../src/application/commands/notifications/SendAssignmentNoticeHandler.js';
+import { SendWelcomeEmailCommand } from '../src/application/notifications/commands/correo-bienvenida/SendWelcomeEmailCommand.js';
+import { SendWelcomeEmailHandler } from '../src/application/notifications/commands/correo-bienvenida/SendWelcomeEmailHandler.js';
+import { SendAssignmentNoticeCommand } from '../src/application/notifications/commands/aviso-asignacion/SendAssignmentNoticeCommand.js';
+import { SendAssignmentNoticeHandler } from '../src/application/notifications/commands/aviso-asignacion/SendAssignmentNoticeHandler.js';
 
 function getCliArg(prefix: string): string | undefined {
   const arg = process.argv.find((item) => item.startsWith(prefix));

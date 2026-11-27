@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
-import { ValidateSessionQuery } from '../../application/queries/auth/ValidateSessionQuery.js';
-import type { ValidateSessionQueryHandler } from '../../application/queries/auth/ValidateSessionQueryHandler.js';
+import { ValidateSessionQuery } from '../../application/auth/queries/validate-session/ValidateSessionQuery.js';
+import type { ValidateSessionQueryHandler } from '../../application/auth/queries/validate-session/ValidateSessionQueryHandler.js';
 import { ResponseBuilder } from '../../infrastructure/utils/responseBuilder.js';
 import { BusinessError } from '../../domain/exceptions/BusinessError.js';
 

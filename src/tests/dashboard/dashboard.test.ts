@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import type { Request, Response } from 'express';
-import type { IDashboardReadModel } from '../../domain/contracts/dashboard.js';
+import type { IDashboardReadModel } from '../../domain/contracts/IDashboardReadModel.js';
 import type { ResumenDashboard } from '../../domain/models/Dashboard.js';
-import { GetDashboardMetricsQuery } from '../../application/queries/dashboard/GetDashboardMetricsQuery.js';
-import { GetDashboardMetricsQueryHandler } from '../../application/queries/dashboard/GetDashboardMetricsQueryHandler.js';
+import { GetDashboardMetricsQuery } from '../../application/dashboard/queries/metricas-dashboard/GetDashboardMetricsQuery.js';
+import { GetDashboardMetricsQueryHandler } from '../../application/dashboard/queries/metricas-dashboard/GetDashboardMetricsQueryHandler.js';
 import { DashboardController } from '../../presentation/controllers/DashboardController.js';
 import { diaDeConsulta } from '../../domain/models/Licencia.js';
 

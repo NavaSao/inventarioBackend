@@ -7,10 +7,10 @@ import type {
   IEmployeeSearchReadModel,
 } from '../../domain/contracts/employeeSearch.js';
 import type { EmpleadoResumen } from '../../domain/models/Empleado.js';
-import { SearchEmployeesQuery } from '../../application/queries/empleados/SearchEmployeesQuery.js';
-import { SearchEmployeesQueryHandler } from '../../application/queries/empleados/SearchEmployeesQueryHandler.js';
-import { SearchEmployeesSelectorQuery } from '../../application/queries/empleados/SearchEmployeesSelectorQuery.js';
-import { SearchEmployeesSelectorQueryHandler } from '../../application/queries/empleados/SearchEmployeesSelectorQueryHandler.js';
+import { SearchEmployeesQuery } from '../../application/empleados/queries/buscar-empleados/SearchEmployeesQuery.js';
+import { SearchEmployeesQueryHandler } from '../../application/empleados/queries/buscar-empleados/SearchEmployeesQueryHandler.js';
+import { SearchEmployeesSelectorQuery } from '../../application/empleados/queries/seleccionar-empleados/SearchEmployeesSelectorQuery.js';
+import { SearchEmployeesSelectorQueryHandler } from '../../application/empleados/queries/seleccionar-empleados/SearchEmployeesSelectorQueryHandler.js';
 import { SearchEmployeesController } from '../../presentation/controllers/SearchEmployeesController.js';
 import { SearchEmployeesSelectorController } from '../../presentation/controllers/SearchEmployeesSelectorController.js';
 

@@ -1,8 +1,8 @@
 import type { IAssignmentNotificationDispatcher } from '../../domain/contracts/licenseAssignment.js';
 import type { Empleado } from '../../domain/models/Empleado.js';
 import type { Licencia } from '../../domain/models/Licencia.js';
-import { SendAssignmentNoticeCommand } from '../../application/commands/notifications/SendAssignmentNoticeCommand.js';
-import type { SendAssignmentNoticeHandler } from '../../application/commands/notifications/SendAssignmentNoticeHandler.js';
+import { SendAssignmentNoticeCommand } from '../../application/notifications/commands/aviso-asignacion/SendAssignmentNoticeCommand.js';
+import type { SendAssignmentNoticeHandler } from '../../application/notifications/commands/aviso-asignacion/SendAssignmentNoticeHandler.js';
 import { EmailRetryPolicy } from '../../application/services/EmailRetryPolicy.js';
 
 /**

@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
-import { GlobalLogoutCommand } from '../../application/commands/auth/GlobalLogoutCommand.js';
-import type { GlobalLogoutCommandHandler } from '../../application/commands/auth/GlobalLogoutCommandHandler.js';
+import { GlobalLogoutCommand } from '../../application/auth/commands/global-logout/GlobalLogoutCommand.js';
+import type { GlobalLogoutCommandHandler } from '../../application/auth/commands/global-logout/GlobalLogoutCommandHandler.js';
 import { ResponseBuilder } from '../../infrastructure/utils/responseBuilder.js';
 import { BusinessError } from '../../domain/exceptions/BusinessError.js';
 

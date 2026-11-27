@@ -79,66 +79,8 @@ export interface ReleaseResult {
   reintentoRecuperado: boolean;
 }
 
-/**
- * Repositorio segregado de escritura y lectura transaccional para asignaciones de licencias (ISP).
- */
-export interface ILicenseAssignmentRepository {
-  asignarCupo(
-    input: AssignLicenseInput,
-    claveAsignacion: string,
-    fechaAsignacion: Date,
-  ): Promise<AsignacionLicenciaDetalle>;
+export type { ILicenseAssignmentRepository } from './ILicenseAssignmentRepository.js';
 
-  liberarCupo(
-    idAsignacionLicencia: string,
-    idUsuarioLiberacion: string,
-    claveLiberacion: string,
-    fechaLiberacion: Date,
-    nota?: string | null,
-  ): Promise<AsignacionLicenciaDetalle>;
+export type { ILicenseUnitOfWork } from './ILicenseUnitOfWork.js';
 
-  buscarAsignacionAbierta(
-    idLicencia: string,
-    idEmpleado: string,
-  ): Promise<AsignacionLicenciaDetalle | null>;
-
-  buscarAsignacionPorId(
-    idAsignacionLicencia: string,
-  ): Promise<AsignacionLicenciaDetalle | null>;
-
-  buscarAsignacionPorClave?(
-    claveAsignacion: string,
-  ): Promise<AsignacionLicenciaDetalle | null>;
-
-  buscarAsignacionPorClaveLiberacion?(
-    claveLiberacion: string,
-  ): Promise<AsignacionLicenciaDetalle | null>;
-
-  obtenerNombreUsuario?(idUsuario: string): Promise<string | null>;
-
-  contarCuposOcupados(idLicencia: string): Promise<number>;
-  obtenerLicencia(idLicencia: string): Promise<Licencia | null>;
-  obtenerEmpleado(idEmpleado: string): Promise<Empleado | null>;
-}
-
-/**
- * Abstracción de Unidad de Trabajo / Transacciones Atómicas (DIP y ACID).
- */
-export interface ILicenseUnitOfWork {
-  executeInTransaction<T>(
-    operation: (repo: ILicenseAssignmentRepository) => Promise<T>,
-  ): Promise<T>;
-}
-
-/**
- * Despachador de notificaciones resiliente con reintentos para asignaciones (HU06).
- */
-export interface IAssignmentNotificationDispatcher {
-  dispatchAssignmentEmail(
-    licencia: Licencia,
-    empleado: Empleado,
-    fechaAsignacion: Date,
-    nombreUsuarioAsignacion?: string,
-    nota?: string | null,
-  ): Promise<{ status: 'SENT' | 'SKIPPED' | 'FAILED'; sent: boolean; reason?: string }>;
-}
+export type { IAssignmentNotificationDispatcher } from './IAssignmentNotificationDispatcher.js';

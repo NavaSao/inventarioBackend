@@ -1,15 +1,13 @@
 import type { NextFunction, Request, Response } from 'express';
-import type { RegistrarEmpleadoHandler } from '../../application/commands/empleados/RegistrarEmpleadoHandler.js';
-import type { EditarEmpleadoHandler } from '../../application/commands/empleados/EditarEmpleadoHandler.js';
-import type { DesactivarEmpleadoHandler } from '../../application/commands/empleados/DesactivarEmpleadoHandler.js';
-import type { ListarEmpleadosHandler } from '../../application/queries/empleados/ListarEmpleadosHandler.js';
+import type { RegistrarEmpleadoHandler } from '../../application/empleados/commands/registrar-empleado/RegistrarEmpleadoHandler.js';
+import type { EditarEmpleadoHandler } from '../../application/empleados/commands/editar-empleado/EditarEmpleadoHandler.js';
+import type { DesactivarEmpleadoHandler } from '../../application/empleados/commands/desactivar-empleado/DesactivarEmpleadoHandler.js';
+import type { ListarEmpleadosHandler } from '../../application/empleados/queries/listar-empleados/ListarEmpleadosHandler.js';
 import { ResponseBuilder } from '../../infrastructure/utils/responseBuilder.js';
-import {
-  editarEmpleadoSchema,
-  parametrosEmpleadoSchema,
-  registroEmpleadoSchema,
-  validarEmpleado,
-} from '../validators/empleadoValidator.js';
+import { validarDesactivacionEmpleado } from '../../application/empleados/commands/desactivar-empleado/DesactivarEmpleadoValidator.js';
+import { editarEmpleadoSchema } from '../../application/empleados/commands/editar-empleado/EditarEmpleadoValidator.js';
+import { parametrosEmpleadoSchema, validarEmpleado } from '../../application/empleados/validacionEmpleado.js';
+import { registroEmpleadoSchema } from '../../application/empleados/commands/registrar-empleado/RegistrarEmpleadoValidator.js';
 
 export class RegistrarEmpleadoController {
   constructor(private readonly casoDeUso: RegistrarEmpleadoHandler) {}
@@ -61,7 +59,7 @@ export class DesactivarEmpleadoController {
 
   public execute = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { id } = validarEmpleado(parametrosEmpleadoSchema, req.params);
+      const { id } = validarDesactivacionEmpleado(req.params);
       const empleado = await this.casoDeUso.handle({ idEmpleado: id });
       ResponseBuilder.success(res, empleado, 'Empleado desactivado exitosamente');
     } catch (error) {

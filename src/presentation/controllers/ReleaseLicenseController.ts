@@ -1,15 +1,12 @@
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
-import { ReleaseLicenseCommand } from '../../application/commands/licencias/ReleaseLicenseCommand.js';
-import type { ReleaseLicenseCommandHandler } from '../../application/commands/licencias/ReleaseLicenseCommandHandler.js';
+import { ReleaseLicenseCommand } from '../../application/licencias/commands/liberar-cupo/ReleaseLicenseCommand.js';
+import type { ReleaseLicenseCommandHandler } from '../../application/licencias/commands/liberar-cupo/ReleaseLicenseCommandHandler.js';
 import { BusinessError } from '../../domain/exceptions/BusinessError.js';
 import { ValidationError } from '../../domain/exceptions/ValidationError.js';
 import { ResponseBuilder } from '../../infrastructure/utils/responseBuilder.js';
-import {
-  extractIdempotencyKey,
-  releaseLicenseBodySchema,
-  releaseLicenseParamSchema,
-} from '../validators/licenseAssignmentValidator.js';
+import { extractIdempotencyKey } from '../utils/extractIdempotencyKey.js';
+import { releaseLicenseBodySchema, releaseLicenseParamSchema } from '../../application/licencias/commands/liberar-cupo/ReleaseLicenseValidator.js';
 
 /**
  * Single Action Controller para Liberación de Licencias (HU07).
